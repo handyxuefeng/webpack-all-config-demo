@@ -1,7 +1,6 @@
 const path = require("path");
 
 const htmlWebpackPlugin = require("html-webpack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   //开发服务器的配置
@@ -27,24 +26,20 @@ module.exports = {
       {
         test: /\.css$/,
         // 1.第一种配置方式
-        use:[
-          MiniCssExtractPlugin.loader, //抽离样式
-          'css-loader',
-          'postcss-loader',
-        ]
-        
+        // use:['style-loader','css-loader']  //1.这种方式也行
 
-    
+        //2.第二种配置方式
+        use: [
+          {
+            loader: "style-loader",
+          },
+          "css-loader",
+        ],
       },
       //less文件的处理
       {
         test: /\.less$/,
-        use: [
-          MiniCssExtractPlugin.loader, //抽离样式
-          "css-loader", 
-          'postcss-loader',
-          "less-loader"
-        ],
+        use: ["style-loader", "css-loader", "less-loader"],
       },
       //sass文件的处理
       {
@@ -70,8 +65,5 @@ module.exports = {
       //   collapseWhitespace:true, //折叠空行
       // },
     }),
-    new MiniCssExtractPlugin({
-      filename:'main.css'
-    })
   ],
 };
