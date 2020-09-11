@@ -5,15 +5,12 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const UglifyjsPlugin = require('uglifyjs-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
-const webpack = require('webpack');
-
-
 
 module.exports = {
   //开发服务器的配置
   devServer: {
     port: 3000,
-    contentBase: "./webapp",
+    contentBase: "./dist",
     progress: true, //进度条
     compress: true, //启动压缩
   },
@@ -22,9 +19,8 @@ module.exports = {
   output: {
     //打包的出口
     filename: "bundles.js",
-    path: path.resolve(__dirname, "webapp"), //必须是一个绝对路径
+    path: path.resolve(__dirname, "dist"), //必须是一个绝对路径
   },
-  
   module: {
     rules: [
       //配置样式文件的处理css-loader 处理css中 @import
@@ -66,8 +62,6 @@ module.exports = {
         exclude:/node_modules/
       },
 
-     
-
       /** js 文件的编译和高级js语法转换为es5 */
       {
         test:/\.js$/,
@@ -86,51 +80,6 @@ module.exports = {
         },
         exclude:/node_modules/  //把node_modules模块排除在外
       },
-
-      /** 配置对图片的处理 file-loader  这些配置不管图片多大，都会发起http 请求 */
-      /*
-      {
-        test:/\.(png|jpeg|jpg|gif)$/,
-        use:[
-          {
-            loader:"file-loader",
-            options:{
-              esModule: false,
-              outputPath:  "imgs",  //图片打包输出的路径webapp/imgs
-            }
-          }
-        ]
-      },
-      */
-  
-      /** 
-       * 对css中一些小图片的处理，在多少k的时候，用base64来转化，否则用file-loader来产生真实的图片
-       */
-      {
-        test:/\.(png|jpeg|jpg|gif)$/,
-        use:[
-          {
-            loader:"url-loader",
-            options:{
-               esModule: false,
-               outputPath:  "imgs",  //图片打包输出的路径webapp/imgs
-               limit: 200 * 1024 //超过200kb之后就通过file-loader来产生真实的图片
-            }
-          }
-        ]
-      },
-
-
-
-
-
-      //解析 html中的图片资源
-      {
-        test: /\.(htm|html)$/i,
-        loader: 'html-withimg-loader'
-      }
-
-
     ],
   },
   plugins: [
@@ -158,31 +107,5 @@ module.exports = {
       sourceMap:true
     })
     */
-
- 
   ],
 };
-
-
-/**
- * webpack 打包图片的方式
-   1. 在js中创建图片来引入
-    通过file-loader 默认会在内部生成一张图片到打包的dist目录中，这个会发起http请求
-    import bmw from './bmw.jpg';
-    let image = new Image();
-    image.src = bmw;
-    document.body.appendChild(image);
-
- * 2. 在css中通过background的方式来引入
-
- * 3. 在html中通过<img src="">方式引入
-      通过html-withimg-loader 实现直接在html中插入图片
-  
-   4. 使用url-loader 在css中一些很小的图片时，可以直接转换base64,不发起http请求,url-loader包含了file-loader功能
-      所以file-loader中的功能参数，在url-loader都能时候用
-      yarn add url-loader -D
-
-
-       
- * 
- */
