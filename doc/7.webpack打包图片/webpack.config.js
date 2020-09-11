@@ -114,7 +114,7 @@ module.exports = {
             options:{
                esModule: false,
                outputPath:  "imgs",  //图片打包输出的路径webapp/imgs
-               limit: 200 * 1024 //超过200kb之后就通过file-loader来产生真实的图片
+               limit: 200 * 1024 //是把小于200KB的文件打成Base64的格式，写入JS
             }
           }
         ]

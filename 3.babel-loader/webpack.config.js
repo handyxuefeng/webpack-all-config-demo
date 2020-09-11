@@ -3,6 +3,12 @@ const path = require("path");
 const htmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+const babelLoader = path.join(__dirname,'loaders/babel-loader.js'); //引入自定义的Loader
+
+
+
+
+
 module.exports = {
   //开发服务器的配置
   devServer: {
@@ -12,6 +18,7 @@ module.exports = {
     compress: true, //启动压缩
   },
   mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
+  devtool:"source-map",
   entry: "./src/index.js", //打包的入口
   output: {
     //打包的出口
@@ -20,6 +27,24 @@ module.exports = {
   },
   module: {
     rules: [
+
+      //js文件的编译
+      {
+        test:/\.js$/,
+        use:[
+          {
+            loader: babelLoader,
+            options:{
+ 
+            }
+          }
+        ]
+      },
+
+
+
+
+
       //配置样式文件的处理css-loader 处理css中 @import
       // style-loader  把css插入到head标签中
       // loader的执行顺序是从右至左执行
@@ -32,9 +57,6 @@ module.exports = {
           'css-loader',
           'postcss-loader',
         ]
-        
-
-    
       },
       //less文件的处理
       {
