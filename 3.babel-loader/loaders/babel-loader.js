@@ -11,13 +11,13 @@ function babel(source) {
  };
 
  //转换后的es5代码，新的source-map文件 ast 抽象语法树
- let {code,map,ast} = babelCore.transform(source,options);
-
+ let {code,sourceMap,ast} = babelCore.transform(source,options);
  /**
    如果babel转换后提供了ast抽象语法树, 那么webpack 会直接 使用这个loader 提供的语法树
    不需要自己把code再转换成ast
  */
- let complierAfterCode =  this.callback(null,code,map,ast);  // 这里的this 是 loaderContext上下文，callback 就是这个上面的方法
+
+ let complierAfterCode = this.callback(null, code, sourceMap, ast);  // 这里的this 是 loaderContext上下文，callback 就是这个上面的方法
 
  return complierAfterCode;
 

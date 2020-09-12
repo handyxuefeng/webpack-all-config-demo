@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const babelLoader = path.join(__dirname,'loaders/babel-loader.js'); //引入自定义的Loader
 
 
+const webpack = require('webpack');
 
 
 
@@ -18,32 +19,34 @@ module.exports = {
     compress: true, //启动压缩
   },
   mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
-  devtool:"source-map",
+ // devtool: "source-map",
+  //devtool: "hidden-source-map",
+  //devtool: "cheap-module-eval-source-map", //开发环境使用，保留调试时es6的原始写法
+  //devtool:'eval',
+  //devtool: "eval-source-map",
+  //devtool: "inline-source-map",
+  //devtool: "cheap-module-source-map",
+  devtool:false, //表示不生成sourceMap
+
   entry: "./src/index.js", //打包的入口
   output: {
     //打包的出口
-    filename: "bundles.js",
+    filename: "bundles.[hash].js",
     path: path.resolve(__dirname, "dist"), //必须是一个绝对路径
   },
   module: {
     rules: [
-
       //js文件的编译
       {
-        test:/\.js$/,
-        use:[
+        test: /\.js$/,
+        use: [
           {
             loader: babelLoader,
-            options:{
- 
-            }
-          }
-        ]
+            options: {},
+          },
+        ],
+        exclude: /node_modules/,
       },
-
-
-
-
 
       //配置样式文件的处理css-loader 处理css中 @import
       // style-loader  把css插入到head标签中
@@ -52,21 +55,21 @@ module.exports = {
       {
         test: /\.css$/,
         // 1.第一种配置方式
-        use:[
+        use: [
           MiniCssExtractPlugin.loader, //抽离样式
-          'css-loader',
-          'postcss-loader',
-        ]
+          "css-loader",
+          "postcss-loader",
+        ],
       },
       //less文件的处理
       {
         test: /\.less$/,
         use: [
           MiniCssExtractPlugin.loader, //抽离样式
-          "css-loader", 
-          
+          "css-loader",
+
           "less-loader",
-          'postcss-loader',
+          "postcss-loader",
         ],
       },
       //sass文件的处理
@@ -74,13 +77,13 @@ module.exports = {
         test: /\.s[ac]ss$/i,
         use: [
           // Creates `style` nodes from JS strings
-          'style-loader',
+          "style-loader",
           // Translates CSS into CommonJS
-          'css-loader',
+          "css-loader",
           // Compiles Sass to CSS
-          'sass-loader'
+          "sass-loader",
         ],
-      }
+      },
     ],
   },
   plugins: [
@@ -94,7 +97,7 @@ module.exports = {
       // },
     }),
     new MiniCssExtractPlugin({
-      filename:'main.css'
-    })
+      filename: "main.css",
+    }),
   ],
 };
