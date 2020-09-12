@@ -55,3 +55,36 @@ java -jar compiler.jar --js script.js --create_source_map ./script-min.js.map --
   ],
 
 ```
+
+## source-map-loader的使用
+- source-map-loader从当前存在的源码(从sourceMappingURL)中提供出map源码
+```
+yarn add source-map-loader -D
+```
+- 在webpack.config.js中添加对js文件的约束
+- source-map-loader的作用就是方便调试es6源码
+```
+{
+  test: /\.js$/,
+  use: [
+    {
+      loader: 'source-map-loader',
+      options: {},
+    },
+  ],
+  enforce:'pre',
+  exclude: /node_modules/,
+},
+{
+  test: /\.js$/,
+  use: [
+    {
+      loader: 'babel-loader',
+      options: {
+        presets: ["@babel/preset-env"]
+      }
+    }
+  ],
+  exclude:/node_modules/i
+}
+```

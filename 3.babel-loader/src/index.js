@@ -1,4 +1,9 @@
+import "./script-min";
+
+
 import operate from './operate';
+
+
 
 let sum =(a,b)=>a+b;
 let result = sum(110,220);
