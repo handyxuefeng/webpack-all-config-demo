@@ -1,12 +1,13 @@
 const path = require("path");
+const webpack = require("webpack");
 
 const htmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const FileManagerPlugin = require("filemanager-webpack-plugin"); //文件管理的插件
 
 const babelLoader = path.join(__dirname,'loaders/babel-loader.js'); //引入自定义的Loader
 
 
-const webpack = require('webpack');
 
 
 
@@ -18,20 +19,20 @@ module.exports = {
     progress: true, //进度条
     compress: true, //启动压缩
   },
-  mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
- // devtool: "source-map",
+  mode: "production", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
+   //devtool: "source-map",
   //devtool: "hidden-source-map",
   //devtool: "cheap-module-eval-source-map", //开发环境使用，保留调试时es6的原始写法
   //devtool:'eval',
   //devtool: "eval-source-map",
   //devtool: "inline-source-map",
   //devtool: "cheap-module-source-map",
-  devtool:false, //表示不生成sourceMap
+  devtool: false, //表示不生成sourceMap
 
   entry: "./src/index.js", //打包的入口
   output: {
     //打包的出口
-    filename: "bundles.[hash].js",
+    filename: "bundles.js",
     path: path.resolve(__dirname, "dist"), //必须是一个绝对路径
   },
   module: {
@@ -67,7 +68,6 @@ module.exports = {
         use: [
           MiniCssExtractPlugin.loader, //抽离样式
           "css-loader",
-
           "less-loader",
           "postcss-loader",
         ],
@@ -98,6 +98,32 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: "main.css",
+    }),
+  
+    //使用webpack内置的sourceMap插件
+    new webpack.SourceMapDevToolPlugin({
+      append: "//# sourceMappingURL=http://127.0.0.1:8080/[url]",
+      filename: "[file].map",
+    }),
+
+    //打包完毕之后移动sourceMap文件到指定的目录
+    new FileManagerPlugin({
+      onEnd: {
+        copy: [
+          {
+            source: "./dist/**/*.map",
+            destination: process.cwd() + "/sourcemapFile",
+          },
+        ],
+        //打包好之后，删除dist目录下生成的map文件
+        delete: ["./dist/**/*.map"],
+        archive: [
+          {
+            source: "./dist",
+            destination: process.cwd() + "/archives/project.zip",
+          },
+        ],
+      },
     }),
   ],
 };

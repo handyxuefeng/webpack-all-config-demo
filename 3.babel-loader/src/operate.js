@@ -1,4 +1,3 @@
-debugger;
 export default {
   getList() {
     return new Promise((resolve, reject) => {

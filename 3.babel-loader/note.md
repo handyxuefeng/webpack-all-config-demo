@@ -21,3 +21,37 @@ java -jar compiler.jar --js script.js --create_source_map ./script-min.js.map --
 }
 
 ```
+
+## sourceMap文件的生成与管理
+- 在webpack.conifig.js文件配置如下选项
+```
+ 
+ plugins: [
+    //使用webpack内置的sourceMap插件
+    new webpack.SourceMapDevToolPlugin({
+      append: "//# sourceMappingURL=http://127.0.0.1:8080/[url]",
+      filename: "[file].map",
+    }),
+
+    //打包完毕之后移动sourceMap文件到指定的目录
+    new FileManagerPlugin({
+      onEnd: {
+        copy: [
+          {
+            source: "./dist/**/*.map",
+            destination: process.cwd() + "/sourcemapFile",
+          },
+        ],
+        //打包好之后，删除dist目录下生成的map文件
+        delete: ["./dist/**/*.map"],
+        archive: [
+          {
+            source: "./dist",
+            destination: process.cwd() + "/archives/project.zip", //对dist目录进行压缩
+          },
+        ],
+      },
+    }),
+  ],
+
+```
