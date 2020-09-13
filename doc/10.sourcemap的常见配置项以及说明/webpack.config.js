@@ -17,15 +17,10 @@ module.exports = {
     progress: true, //进度条
     compress: true, //启动压缩
   },
-  //配置webpack的watch
-  watch: true,
-  watchOptions: {
-    poll: 1000, //每秒监控一次
-    aggregateTimeout: 500, //防抖
-    ignored: /node_modules/, // 表示不需要监控这个文件夹
-  },
   mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
-  devtool: "source-map", //源码映射，会单独生成map文件，
+  //devtool: "source-map", //源码映射，会单独生成map文件，
+  //devtool:'eval-source-map',
+  devtool:'cheap-module-source-map',
   entry: "./src/sourcemapconfig.js",
   output: {
     //打包的出口
@@ -132,8 +127,6 @@ module.exports = {
     //把抽取的css进行压缩
     new OptimizeCSSAssetsPlugin({}),
 
-    //打包的代码版权声明插件
-    new webpack.BannerPlugin('make by hxf at 20200913')
 
   ],
 };

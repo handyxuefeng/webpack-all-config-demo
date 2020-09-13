@@ -131,10 +131,6 @@ module.exports = {
     }),
     //把抽取的css进行压缩
     new OptimizeCSSAssetsPlugin({}),
-
-    //打包的代码版权声明插件
-    new webpack.BannerPlugin('make by hxf at 20200913')
-
   ],
 };
 

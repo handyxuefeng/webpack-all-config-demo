@@ -1,3 +1,4 @@
+/*! make by hxf at 20200913 */
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -119,9 +120,10 @@ __webpack_require__.r(__webpack_exports__);
 var SourceMapConfig = function SourceMapConfig() {
   _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0___default()(this, SourceMapConfig);
 
-  consle.log('这里console没有写全,可以通过配置的devtool直接映射过来');
+  console.log('这里console没有写全,可以通过配置的devtool直接映射过来');
 };
 
+var a = 1;
 var source = new SourceMapConfig();
 /* harmony default export */ __webpack_exports__["default"] = (SourceMapConfig);
 

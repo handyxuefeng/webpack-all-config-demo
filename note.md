@@ -17,3 +17,21 @@ yarn add css-loader style-loader -D
 - eval-source-map   不会产生sourcemap文件
 - cheap-module-source-map   不会产生列号，但是会产生一个单独的sourcemap文件
 - cheap-module-eval-source-map  不生成文件，也不产生列，集成在打包后的文件中
+
+## 配置webpack的watch
+```
+module.exports= {
+  //配置webpack的watch
+  watch: true,
+  watchOptions: {
+    poll: 1000, //每秒监控一次
+    aggregateTimeout: 500, //防抖
+    ignored: /node_modules/, // 表示不需要监控这个文件夹
+  }
+}
+```
+
+## webpack 常见插件的使用
+- cleanWebpackPlugin  第三方插件
+- copyWebpackPlugin 第三方插件
+- bannerPlugin webpack内置插件
