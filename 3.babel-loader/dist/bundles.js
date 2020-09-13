@@ -90,16 +90,17 @@
 /*!**********************!*\
   !*** ./src/index.js ***!
   \**********************/
-/*! no exports provided */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _script_min__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./script-min */ "./src/script-min.js");
-/* harmony import */ var _script_min__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_script_min__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _operate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./operate */ "./src/operate.js");
 
 
+__webpack_require__(/*! ./script-min */ "./src/script-min.js");
+
+var _operate = _interopRequireDefault(__webpack_require__(/*! ./operate */ "./src/operate.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var sum = function sum(a, b) {
   return a + b;
@@ -107,12 +108,13 @@ var sum = function sum(a, b) {
 
 var result = sum(110, 220);
 setTimeout(function () {
-  var promise = _operate__WEBPACK_IMPORTED_MODULE_1__["default"].getList();
+  var promise = _operate["default"].getList();
+
   promise.then(function (data) {
     console.log("data = ", data);
   });
 }, 2000);
-console.log('operate = ', _operate__WEBPACK_IMPORTED_MODULE_1__["default"], 'result=', result);
+console.log('operate = ', _operate["default"], 'result=', result);
 
 /***/ }),
 
@@ -120,12 +122,17 @@ console.log('operate = ', _operate__WEBPACK_IMPORTED_MODULE_1__["default"], 'res
 /*!************************!*\
   !*** ./src/operate.js ***!
   \************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ({
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var _default = {
   getList: function getList() {
     return new Promise(function (resolve, reject) {
       setTimeout(function () {
@@ -148,7 +155,8 @@ __webpack_require__.r(__webpack_exports__);
       return a + b;
     };
   }
-});
+};
+exports["default"] = _default;
 
 /***/ }),
 
@@ -157,7 +165,10 @@ __webpack_require__.r(__webpack_exports__);
   !*** ./src/script-min.js ***!
   \***************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var a = 1,
     b = 2,

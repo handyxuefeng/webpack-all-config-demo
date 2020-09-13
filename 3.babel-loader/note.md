@@ -63,6 +63,8 @@ yarn add source-map-loader -D
 ```
 - 在webpack.config.js中添加对js文件的约束
 - source-map-loader的作用就是方便调试es6源码
+- 针对.js文件添加source-map-loader的映射
+
 ```
 {
   test: /\.js$/,
@@ -88,3 +90,8 @@ yarn add source-map-loader -D
   exclude:/node_modules/i
 }
 ```
+## loader 的类型
+- pre-loader 前置loader
+- normal-loader 普通loader
+- inline-loader 行内loader
+- post-loader 后置loader

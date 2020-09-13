@@ -21,10 +21,11 @@ module.exports = {
   entry: "./src/index.js", //打包的入口
   output: {
     //打包的出口
-    filename: "bundles.js",
+    filename: "script/bundles.js",
     path: path.resolve(__dirname, "webapp"), //必须是一个绝对路径
+   // publicPath: "http://127.0.0.1:8081", //给所有访问的静态资源添加访问的域名,可利用http-server单独起一个服务进行测试
   },
-  
+
   module: {
     rules: [
       //配置样式文件的处理css-loader 处理css中 @import
@@ -34,57 +35,54 @@ module.exports = {
       {
         test: /\.css$/,
         // 1.第一种配置方式
-        use:[
+        use: [
           MiniCssExtractPlugin.loader, //抽离样式
-          'css-loader',
-          'postcss-loader',
+          "css-loader",
+          "postcss-loader",
         ],
-        exclude:/node_modules/
+        exclude: /node_modules/,
       },
       //less文件的处理
       {
         test: /\.less$/,
         use: [
           MiniCssExtractPlugin.loader, //抽离样式
-          "css-loader", 
+          "css-loader",
           "less-loader",
-          'postcss-loader',
+          "postcss-loader",
         ],
-        exclude:/node_modules/
+        exclude: /node_modules/,
       },
       //sass文件的处理
       {
         test: /\.s[ac]ss$/i,
         use: [
           // Creates `style` nodes from JS strings
-          'style-loader',
+          "style-loader",
           // Translates CSS into CommonJS
-          'css-loader',
+          "css-loader",
           // Compiles Sass to CSS
-          'sass-loader'
+          "sass-loader",
         ],
-        exclude:/node_modules/
+        exclude: /node_modules/,
       },
-
-     
 
       /** js 文件的编译和高级js语法转换为es5 */
       {
-        test:/\.js$/,
-        use:{
-          loader:'babel-loader',
-          options:{ //用babel-loader 插件把 es6-10的语法转换es5的配置
-             presets:[
-               '@babel/preset-env'
-             ],
-             plugins:[
-              ["@babel/plugin-proposal-decorators", { "legacy": true }], //类装饰器的配置
-              ['@babel/plugin-proposal-class-properties',{"loose":true}], //支持es7中类的属性高级赋值写法
-              ["@babel/plugin-transform-runtime"] //配置支持generate,Promise ,includes 高级API的写法,在脚本中 require('@babel/polyfill');
-             ]
-          }
+        test: /\.js$/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            //用babel-loader 插件把 es6-10的语法转换es5的配置
+            presets: ["@babel/preset-env"],
+            plugins: [
+              ["@babel/plugin-proposal-decorators", { legacy: true }], //类装饰器的配置
+              ["@babel/plugin-proposal-class-properties", { loose: true }], //支持es7中类的属性高级赋值写法
+              ["@babel/plugin-transform-runtime"], //配置支持generate,Promise ,includes 高级API的写法,在脚本中 require('@babel/polyfill');
+            ],
+          },
         },
-        exclude:/node_modules/  //把node_modules模块排除在外
+        exclude: /node_modules/, //把node_modules模块排除在外
       },
 
       /** 配置对图片的处理 file-loader  这些配置不管图片多大，都会发起http 请求 */
@@ -102,35 +100,30 @@ module.exports = {
         ]
       },
       */
-  
-      /** 
+
+      /**
        * 对css中一些小图片的处理，在多少k的时候，用base64来转化，否则用file-loader来产生真实的图片
        */
       {
-        test:/\.(png|jpeg|jpg|gif)$/,
-        use:[
+        test: /\.(png|jpeg|jpg|gif)$/,
+        use: [
           {
-            loader:"url-loader",
-            options:{
-               esModule: false,
-               outputPath:  "imgs",  //图片打包输出的路径webapp/imgs
-               limit: 200 * 1024 //超过200kb之后就通过file-loader来产生真实的图片
-            }
-          }
-        ]
+            loader: "url-loader",
+            options: {
+              esModule: false,
+              // publicPath:"http://www.han.cn", //图片也可指定不同的域名来加载,比如发布到cdn
+              outputPath: "/imgs/", //图片打包输出的路径webapp/imgs
+              limit: 200 * 1024, //超过200kb之后就通过file-loader来产生真实的图片
+            },
+          },
+        ],
       },
-
-
-
-
 
       //解析 html中的图片资源
       {
         test: /\.(htm|html)$/i,
-        loader: 'html-withimg-loader'
-      }
-
-
+        loader: "html-withimg-loader",
+      },
     ],
   },
   plugins: [
@@ -143,9 +136,9 @@ module.exports = {
       //   collapseWhitespace:true, //折叠空行
       // },
     }),
-    //抽取css文件的插件
+    //抽取css文件的插件,打包好的文件放在webapp/css目录下
     new MiniCssExtractPlugin({
-      filename:'main.css'
+      filename: "css/main.css",
     }),
     //把抽取的css进行压缩
     new OptimizeCSSAssetsPlugin({}),
@@ -158,8 +151,6 @@ module.exports = {
       sourceMap:true
     })
     */
-
- 
   ],
 };
 

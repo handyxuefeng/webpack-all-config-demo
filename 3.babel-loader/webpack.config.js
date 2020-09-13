@@ -48,20 +48,32 @@ module.exports = {
         enforce:'pre',
         exclude: /node_modules/,
       },
+
+      //js文件的编译
       {
         test: /\.js$/,
         use: [
           {
-            loader: 'babel-loader',
-            options: {
-              presets: ["@babel/preset-env"]
-            }
-          }
+            loader: babelLoader,
+            options: {},
+          },
         ],
+        exclude: /node_modules/,
+      },
+      
+      //这个是官方babel-loader，对es6-10的转义
+      /*
+      {
+        test: /\.js$/,
+        use: [{
+          loader: 'babel-loader',
+          options: {
+            presets: ["@babel/preset-env"]
+          }
+        }],
         exclude:/node_modules/i
       },
-
-
+      */
     
       //配置样式文件的处理css-loader 处理css中 @import
       // style-loader  把css插入到head标签中
