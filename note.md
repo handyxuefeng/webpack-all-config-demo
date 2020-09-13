@@ -11,3 +11,9 @@
 ```
 yarn add css-loader style-loader -D
 ```
+
+## webapck中常见devtool的配置说明
+- source-map        会产生sourcemap文件,报错信息大而全
+- eval-source-map   不会产生sourcemap文件
+- cheap-module-source-map   不会产生列号，但是会产生一个单独的sourcemap文件
+- cheap-module-eval-source-map  不生成文件，也不产生列，集成在打包后的文件中

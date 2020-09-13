@@ -13,21 +13,19 @@ module.exports = {
   //开发服务器的配置
   devServer: {
     port: 3000,
-    contentBase: "./multiplePage",
+    contentBase: "./sourcemapconfig",
     progress: true, //进度条
     compress: true, //启动压缩
   },
   mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
-
-  //MPA开发模式多页打包的配置
-  entry: {
-    home: "./src/home.js",
-    other: "./src/other.js",
-  },
+  //devtool: "source-map", //源码映射，会单独生成map文件，
+  //devtool:'eval-source-map',
+  devtool:'cheap-module-source-map',
+  entry: "./src/sourcemapconfig.js",
   output: {
     //打包的出口
     filename: "script/[name].js",
-    path: path.resolve(__dirname, "multiplePage"), //
+    path: path.resolve(__dirname, "sourcemapconfig"), //
     // publicPath: "http://127.0.0.1:8081", //给所有访问的静态资源添加访问的域名,可利用http-server单独起一个服务进行测试
   },
 
@@ -118,14 +116,7 @@ module.exports = {
   plugins: [
     new htmlWebpackPlugin({
       template: path.resolve(__dirname, "./src/index.html"), //打包的模板
-      filename: "home.html", //打包之后的文件名称
-      chunks: ["home"], //制定需要加载哪些打包之后的文件
-      hash: true, //在页面中引用js时，自动给脚本添加hash版本号
-    }),
-    new htmlWebpackPlugin({
-      template: path.resolve(__dirname, "./src/index.html"), //打包的模板
-      filename: "other.html", //打包之后的文件名称
-      chunks: ["other","home"],//
+      filename: "index.html", //打包之后的文件名称
       hash: true, //在页面中引用js时，自动给脚本添加hash版本号
     }),
 
@@ -136,18 +127,7 @@ module.exports = {
     //把抽取的css进行压缩
     new OptimizeCSSAssetsPlugin({}),
 
-    //js文件进行压缩
-    /*
-    new UglifyjsPlugin({
-      cache:true,
-      parallel:true, //并发
-      sourceMap:true
-    })
-    */
+
   ],
 };
 
-
-/**
-
- */
