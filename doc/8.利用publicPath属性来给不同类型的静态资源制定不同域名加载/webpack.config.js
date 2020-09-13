@@ -13,22 +13,17 @@ module.exports = {
   //开发服务器的配置
   devServer: {
     port: 3000,
-    contentBase: "./multiplePage",
+    contentBase: "./webapp",
     progress: true, //进度条
     compress: true, //启动压缩
   },
   mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
-
-  //MPA开发模式多页打包的配置
-  entry: {
-    home: "./src/home.js",
-    other: "./src/other.js",
-  },
+  entry: "./src/index.js", //打包的入口
   output: {
     //打包的出口
-    filename: "script/[name].js",
-    path: path.resolve(__dirname, "multiplePage"), //
-    // publicPath: "http://127.0.0.1:8081", //给所有访问的静态资源添加访问的域名,可利用http-server单独起一个服务进行测试
+    filename: "script/bundles.js",
+    path: path.resolve(__dirname, "webapp"), //必须是一个绝对路径
+    publicPath: "http://127.0.0.1:8081", //给所有访问的静态资源添加访问的域名,可利用http-server单独起一个服务进行测试
   },
 
   module: {
@@ -118,17 +113,13 @@ module.exports = {
   plugins: [
     new htmlWebpackPlugin({
       template: path.resolve(__dirname, "./src/index.html"), //打包的模板
-      filename: "home.html", //打包之后的文件名称
-      chunks: ["home"], //制定需要加载哪些打包之后的文件
+      filename: "index.html", //打包之后的文件名称
       hash: true, //在页面中引用js时，自动给脚本添加hash版本号
+      // minify:{
+      //   removeAttributeQuotes:false ,//删除双引号
+      //   collapseWhitespace:true, //折叠空行
+      // },
     }),
-    new htmlWebpackPlugin({
-      template: path.resolve(__dirname, "./src/index.html"), //打包的模板
-      filename: "other.html", //打包之后的文件名称
-      chunks: ["other","home"],//
-      hash: true, //在页面中引用js时，自动给脚本添加hash版本号
-    }),
-
     //抽取css文件的插件,打包好的文件放在webapp/css目录下
     new MiniCssExtractPlugin({
       filename: "css/main.css",
@@ -149,5 +140,24 @@ module.exports = {
 
 
 /**
+ * webpack 打包图片的方式
+   1. 在js中创建图片来引入
+    通过file-loader 默认会在内部生成一张图片到打包的dist目录中，这个会发起http请求
+    import bmw from './bmw.jpg';
+    let image = new Image();
+    image.src = bmw;
+    document.body.appendChild(image);
 
+ * 2. 在css中通过background的方式来引入
+
+ * 3. 在html中通过<img src="">方式引入
+      通过html-withimg-loader 实现直接在html中插入图片
+  
+   4. 使用url-loader 在css中一些很小的图片时，可以直接转换base64,不发起http请求,url-loader包含了file-loader功能
+      所以file-loader中的功能参数，在url-loader都能时候用
+      yarn add url-loader -D
+
+
+       
+ * 
  */
