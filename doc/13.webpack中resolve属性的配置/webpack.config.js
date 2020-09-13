@@ -13,7 +13,7 @@ module.exports = {
   //开发服务器的配置
   devServer: {
     port: 3000,
-    contentBase: "./optimizeFile",
+    contentBase: "./sourcemapconfig",
     progress: true, //进度条
     compress: true, //启动压缩
   },
@@ -26,11 +26,11 @@ module.exports = {
   },
   mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
   devtool: "source-map", //源码映射，会单独生成map文件，
-  entry: "./src/optimize.js",
+  entry: "./src/sourcemapconfig.js",
   output: {
     //打包的出口
     filename: "script/[name].js",
-    path: path.resolve(__dirname, "optimizeFile"), //
+    path: path.resolve(__dirname, "sourcemapconfig"), //
     // publicPath: "http://127.0.0.1:8081", //给所有访问的静态资源添加访问的域名,可利用http-server单独起一个服务进行测试
   },
 
@@ -41,11 +41,10 @@ module.exports = {
     alias: {
       bootstrap: "bootstrap/dist/css/bootstrap.css",
     },
-    extensions: [".js", ".css", ".json"], //import在导入文件时候，省略后缀名时候，一次按照这个来查找
+    extends:['.js','.css','.json'] //import在导入文件时候，省略后缀名时候，一次按照这个来查找
   },
 
   module: {
-    noParse:/jquery/,
     rules: [
       //配置样式文件的处理css-loader 处理css中 @import
       // style-loader  把css插入到head标签中
@@ -93,10 +92,7 @@ module.exports = {
           loader: "babel-loader",
           options: {
             //用babel-loader 插件把 es6-10的语法转换es5的配置
-            presets: [
-              "@babel/preset-env",
-              "@babel/preset-react" //解析react语法
-            ],
+            presets: ["@babel/preset-env"],
             plugins: [
               ["@babel/plugin-proposal-decorators", { legacy: true }], //类装饰器的配置
               ["@babel/plugin-proposal-class-properties", { loose: true }], //支持es7中类的属性高级赋值写法
@@ -148,17 +144,6 @@ module.exports = {
 
     //打包的代码版权声明插件
     new webpack.BannerPlugin("make by hxf at 20200913"),
-
-    //在webpack中定义环境变量，方便系统中每个业务逻辑，需要判断环境变量
-    new webpack.DefinePlugin({
-      DEV: JSON.stringify("production"),
-      isMobile: true,
-      expression: "10+20+30+40",
-    }),
-
-    // webpack性能优化之一，忽略一些没有必要的语言包
-    new webpack.IgnorePlugin(/\.\/locale/,/moment/)
-
   ],
 };
 

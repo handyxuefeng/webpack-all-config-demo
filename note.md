@@ -35,3 +35,78 @@ module.exports= {
 - cleanWebpackPlugin  第三方插件
 - copyWebpackPlugin 第三方插件
 - bannerPlugin webpack内置插件
+
+
+## webpack 中resolve属性的配置
+```
+module.exports = {
+    //解析第三方包
+  resolve: {
+    modules: [path.resolve("node_modules")], //让每个解析的包都从node_modules去解析和加载
+    //给长路径定义别名
+    alias: {
+      bootstrap: "bootstrap/dist/css/bootstrap.css",
+    },
+    extends:['.js','.css','.json'] //import在导入文件时候，省略后缀名时候，一次按照这个来查找
+  }
+}
+```
+
+## 在webpack中通过插件配置环境变量
+- 通过webpack自带的插件定义环境变量
+```
+module.exports = {
+  plugins:[
+      //在webpack中定义环境变量，方便系统中每个业务逻辑，需要判断环境变量
+    new webpack.DefinePlugin({
+      DEV:JSON.stringify('production'),
+      isMobile:true,
+      expression:"10+20+30+40"
+    })
+  ]
+}
+
+在系统的每个业务中，就可以使用这些环境变量直接读取这些变量
+```
+
+## webpack性能优化 
+- 1.noParse   优化点之一，不去解析某些包依赖关系，加快webpack打包时间
+
+- 2.IgnorePlugin  //比如使用moment插件包时，如果只是用了中文，那么就没有导入使用其他语言包了
+  - 2.1 exclude: /node_modules/, //把node_modules模块排除在外
+  - 2.2 include:path.resolve('src') //编译js文件只在src
+
+- 3. dllPlugin  抽取类库插件，比如可以把react，react-dom 插件抽取出来
+
+
+
+```
+module.exports = {
+  module:{
+    noParse: /jquery/ 优化点之一，不去解析某些包，加快webpack打包时间
+    rules:[
+      {
+        test: /\.js$/,
+        exclude: /node_modules/, //把node_modules模块排除在外
+        include:path.resolve('src') //编译js文件只在src
+        use: {
+          loader: "babel-loader",
+          options: {
+            //用babel-loader 插件把 es6-10的语法转换es5的配置
+            presets: [
+              "@babel/preset-env",
+              "@babel/preset-react" //解析react语法
+            ],
+            plugins: [
+              ["@babel/plugin-proposal-decorators", { legacy: true }], //类装饰器的配置
+              ["@babel/plugin-proposal-class-properties", { loose: true }], //支持es7中类的属性高级赋值写法
+              ["@babel/plugin-transform-runtime"], //配置支持generate,Promise ,includes 高级API的写法,在脚本中 require('@babel/polyfill');
+            ],
+          },
+        }
+        
+      }
+    ]
+  }
+}
+```
