@@ -1,6 +1,6 @@
 function loader(source){
-   console.log('inline-loader2');
-   return soure+"//inline-loader2";
+   console.log("pre-loader2");
+   return source + "//pre-loader2";
 }
 
 module.exports = loader;
