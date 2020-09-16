@@ -10,7 +10,6 @@ const path = require('path');
 const fs = require('fs');
 const loadDir = path.resolve(__dirname,'loaders');//loader的目录
 const {runLoaders} = require('loader-runner'); //webpack自带的
-const { log } = require('console');
 let request = 'inline-loader1!inline-loader2!./src/index.js';
 let inlineLoaders = request.split('!');//[inline-loader1,inline-loader2,./index.js]
 
@@ -87,8 +86,6 @@ let allLoaders = [
   ...normalLoaders,
   ...preLoaders,
 ];
-
-console.log('allLoaders=',allLoaders);
 
 
 
