@@ -75,11 +75,6 @@ module.exports = {
 - 2.IgnorePlugin  //比如使用moment插件包时，如果只是用了中文，那么就没有导入使用其他语言包了
   - 2.1 exclude: /node_modules/, //把node_modules模块排除在外
   - 2.2 include:path.resolve('src') //编译js文件只在src
-
-- 3. dllPlugin  抽取类库插件，比如可以把react，react-dom 插件抽取出来
-
-
-
 ```
 module.exports = {
   module:{
@@ -109,4 +104,156 @@ module.exports = {
     ]
   }
 }
+```
+
+- 3. webpack.DllPlugin & webpack.DllReferencePlugin  抽取类库插件，比如可以把react，react-dom 插件抽取出来
+  - 3.1 先配置抽取动态链接库的webpack.react.dll.js ，使用webpack.DllPlugin 
+  - 3.2 在webpack.config.js中使用webpack.DllReferencePlugin
+```
+const path = require('path');
+const webpack = require('webpack');
+module.exports = {
+   mode:"development",
+   entry:{
+      'react_lib':['react','react-dom']
+      //test:'./src/testdll.js'
+   },
+   output:{
+      filename:"_dll_[name].js",
+      path: path.resolve(__dirname, "testdlldirectory"), //
+      library:'_dll_[name]',
+
+     // libraryTarget:'commonjs'  //表示打包出来的js遵循commonjs的规范，默认是var
+     // libraryTarget:'umd'  //表示打包出来的js遵循umd的规范
+      //libraryTarget:'amd' 
+
+   },
+   plugins:[
+    /**
+     * webpack.DllPlugin 的选项中：
+      path 是 manifest.json 文件的输出路径，这个文件会用于后续的业务代码打包；
+      name 是 dll 暴露的对象名，要跟 output.library 保持一致；
+      context 是解析包路径的上下文，这个要跟接下来配置的 webpack.config.js 一致
+     */
+      new webpack.DllPlugin({
+         path: 'manifest.json',
+         name: '_dll_[name]',  //这个名字要和output中配置的library一样
+         context: __dirname,
+     }),
+     
+   ]
+}
+在package.json中配置
+{
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack-dev-server",
+    "dll":"webpack --config webpack.react.dll.js"
+  }
+}
+终端运行命令npm run dll 
+```
+- webpack.config.js中的配置
+```
+const path = require("path");
+
+const htmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const UglifyjsPlugin = require('uglifyjs-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const webpack = require('webpack');
+module.exports = {
+  //开发服务器的配置
+  devServer: {
+    port: 3000,
+    contentBase: "./testdlldirectory",
+    progress: true, //进度条
+    compress: true, //启动压缩
+  },
+
+  mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
+  devtool: "source-map", //源码映射，会单独生成map文件，
+  entry: "./src/extractdll.js",
+  output: {
+    //打包的出口
+    filename: "script/[name].js",
+    path: path.resolve(__dirname, "testdlldirectory"), //
+    // publicPath: "http://127.0.0.1:8081", //给所有访问的静态资源添加访问的域名,可利用http-server单独起一个服务进行测试
+  },
+
+
+  plugins: [
+    //使用dllReferenceDllPlugin引用动态链接库
+    new webpack.DllReferencePlugin({
+       context:__dirname,
+       manifest:require('./manifest.json')
+    }) 
+  ],
+};
+
+
+```
+
+## 使用happlypack进行多线程打包
+```
+yarn add happlypack -D
+moudule.exports = {
+  module:{
+     rules:[
+       {
+         test:/\.js$/,
+         use:'Happypack/loader?id=js'
+       },
+       {
+         test:/\.css$/,
+         use:'Happypack/loader?id=css'
+       }
+     ]
+  },
+  plugins:[
+     //使用Happypack实现多线程打包
+    new Happypack({
+       id:"js",
+       use:[
+        {
+          loader: "babel-loader",
+          options: {
+            //用babel-loader 插件把 es6-10的语法转换es5的配置
+            presets: [
+              "@babel/preset-env",
+              "@babel/preset-react" //解析react语法
+            ],
+            plugins: [
+              ["@babel/plugin-proposal-decorators", { legacy: true }], //类装饰器的配置
+              ["@babel/plugin-proposal-class-properties", { loose: true }], //支持es7中类的属性高级赋值写法
+              ["@babel/plugin-transform-runtime"], //配置支持generate,Promise ,includes 高级API的写法,在脚本中 require('@babel/polyfill');
+            ],
+          },
+        }
+       ]
+    }),
+    new Happypack({
+      id:"css",
+      use:[
+        "style-loader",
+        MiniCssExtractPlugin.loader, //抽离样式
+        "css-loader",
+        "postcss-loader",
+      ]
+    })
+  ]
+}
+
+```
+
+
+## webpack中js和css的tree-shaking优化
+
+- 在前端使用import语法导入代码，在生产环境下会自动去除没用的代码
+- 通过require方式导入的代码，生产环境没有tree-shaking效果，所以建议用import
+- webpack在生产环境下，通过import导入的js代码，打包生产环境时， 会自动删除没有用到的代码
+- css的tree shaking 可以通过安装 glob-all purifycss-webpack 实现
+```
+yarn add glob-all purifycss-webpack -D 
+
 ```

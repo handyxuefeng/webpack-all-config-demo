@@ -14,6 +14,15 @@ export default {
         if (arr.includes(9)) {
             return true;
         }
+    },
+    minus(a,b){
+        console.log('这个是减法');
+        return a-b;
+    },
+    mul(a,b){
+        return a * b;
+    },
+    div(a,b){
+        return a / b;
     }
-    
 };

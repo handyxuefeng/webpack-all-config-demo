@@ -8,16 +8,13 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const webpack = require('webpack');
 let Happypack = require('happypack');
 
-const PurifyCSS = require('purifycss-webpack') ;//css 的tree-shaking插件
-const glob = require('glob-all');//glob-all 的作用就是帮助 PurifyCSS 进行路径处理，定位要做 Tree Shaking 的路径文件
-
 
 
 module.exports = {
   //开发服务器的配置
   devServer: {
     port: 3000,
-    contentBase: "./treeshaking",
+    contentBase: "./happypackTest",
     progress: true, //进度条
     compress: true, //启动压缩
   },
@@ -28,13 +25,13 @@ module.exports = {
     aggregateTimeout: 500, //防抖
     ignored: /node_modules/, // 表示不需要监控这个文件夹
   },
-  mode: "production", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
+  mode: "development", //打包的模式，开发环境和生产环境都是不一样，开发环境不会压缩
   devtool: "source-map", //源码映射，会单独生成map文件，
-  entry: "./src/tree-shaking.js",
+  entry: "./src/happypack.js",
   output: {
     //打包的出口
-    filename: "script/[name].production.js",
-    path: path.resolve(__dirname, "treeshaking"), //
+    filename: "script/[name].js",
+    path: path.resolve(__dirname, "happypackTest"), //
     // publicPath: "http://127.0.0.1:8081", //给所有访问的静态资源添加访问的域名,可利用http-server单独起一个服务进行测试
   },
 
@@ -58,12 +55,15 @@ module.exports = {
       {
         test: /\.css$/,
         // 1.第一种配置方式
+        /*
         use: [
           "style-loader",
           MiniCssExtractPlugin.loader, //抽离样式
           "css-loader",
           "postcss-loader",
         ],
+        */
+       use:"Happypack/loader?id=css"
       },
       //less文件的处理
       {
@@ -93,6 +93,7 @@ module.exports = {
       /** js 文件的编译和高级js语法转换为es5 */
       {
         test: /\.js$/,
+        /*
         use: {
           loader: "babel-loader",
           options: {
@@ -108,6 +109,8 @@ module.exports = {
             ],
           },
         },
+        */
+        use:'Happypack/loader?id=js',
         exclude: /node_modules/, //把node_modules模块排除在外
       },
 
@@ -139,7 +142,7 @@ module.exports = {
   },
   plugins: [
     new htmlWebpackPlugin({
-      template: path.resolve(__dirname, "./src/tree-shaking.html"), //打包的模板
+      template: path.resolve(__dirname, "./src/happypack.html"), //打包的模板
       filename: "index.html", //打包之后的文件名称
       hash: true, //在页面中引用js时，自动给脚本添加hash版本号
     }),
@@ -148,17 +151,6 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: "css/main.css",
     }),
-
-    //css的tree-shaking配置
-    new PurifyCSS({
-      paths: glob.sync([
-        // 要做 CSS Tree Shaking 的路径文件
-        path.resolve(__dirname, './src/*.html'), // 请注意，我们同样需要对 html 文件进行 tree shaking
-        path.resolve(__dirname, './src/*.js')
-      ])
-    }),
-
-    
     //把抽取的css进行压缩
     new OptimizeCSSAssetsPlugin({}),
 
@@ -179,11 +171,39 @@ module.exports = {
     //使用dllReferenceDllPlugin引用动态链接库
     new webpack.DllReferencePlugin({
        context:__dirname,
-       manifest:require('./manifest.json') // 如果没有找到该json文件，会在引用react,reactdom的地方再把react打包进去
+       manifest:require('./manifest.json')
     }),
 
-   
-
+    //使用Happypack实现多线程打包
+    new Happypack({
+       id:"js",
+       use:[
+        {
+          loader: "babel-loader",
+          options: {
+            //用babel-loader 插件把 es6-10的语法转换es5的配置
+            presets: [
+              "@babel/preset-env",
+              "@babel/preset-react" //解析react语法
+            ],
+            plugins: [
+              ["@babel/plugin-proposal-decorators", { legacy: true }], //类装饰器的配置
+              ["@babel/plugin-proposal-class-properties", { loose: true }], //支持es7中类的属性高级赋值写法
+              ["@babel/plugin-transform-runtime"], //配置支持generate,Promise ,includes 高级API的写法,在脚本中 require('@babel/polyfill');
+            ],
+          },
+        }
+       ]
+    }),
+    new Happypack({
+      id:"css",
+      use:[
+        "style-loader",
+        MiniCssExtractPlugin.loader, //抽离样式
+        "css-loader",
+        "postcss-loader",
+      ]
+    })
 
 
 
