@@ -3,4 +3,12 @@ function loader(source){
    return source + "//inline-loader2";
 }
 
+loader.pitch = function() {
+   console.log('inline-loader2-pitch2');
+}
+
+loader.normal = function() {
+   console.log('inline-loader2-normal2');
+}
+
 module.exports = loader;

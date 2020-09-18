@@ -7,10 +7,6 @@ const FileManagerPlugin = require("filemanager-webpack-plugin"); //文件管理�
 
 const babelLoader = path.join(__dirname,'loaders/babel-loader.js'); //引入自定义的Loader
 
-
-
-
-
 module.exports = {
   //开发服务器的配置
   devServer: {
@@ -50,6 +46,7 @@ module.exports = {
       },
 
       //js文件的编译
+    
       {
         test: /\.js$/,
         use: [

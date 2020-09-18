@@ -2564,7 +2564,7 @@ file-uri-to-path@1.0.0:
 
 filemanager-webpack-plugin@^2.0.5:
   version "2.0.5"
-  resolved "https://registry.npmjs.org/filemanager-webpack-plugin/-/filemanager-webpack-plugin-2.0.5.tgz#6cec3a2a02d429abca64ed6c0c1c46ae54b1846b"
+  resolved "https://registry.yarnpkg.com/filemanager-webpack-plugin/-/filemanager-webpack-plugin-2.0.5.tgz#6cec3a2a02d429abca64ed6c0c1c46ae54b1846b"
   integrity sha512-Yj5XIdKI2AN2r66uZc4MZ/n18SMqe2KKlkAqHHMW1OwveDs2Vc5129CpbFcI73rq/rjqso+2HsxieS7u5sx6XA==
   dependencies:
     archiver "^3.0.0"

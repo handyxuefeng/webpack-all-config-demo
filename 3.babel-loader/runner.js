@@ -10,12 +10,18 @@ const path = require('path');
 const fs = require('fs');
 const loadDir = path.resolve(__dirname,'loaders');//loader的目录
 const {runLoaders} = require('loader-runner'); //webpack自带的
-const { log } = require('console');
+//const runLoaders = require('./loader-runner'); //webpack自带的
+//let request = '-!inline-loader1!inline-loader2!./src/index.js?k=1#top';
 let request = 'inline-loader1!inline-loader2!./src/index.js';
-let inlineLoaders = request.split('!');//[inline-loader1,inline-loader2,./index.js]
+
+//let inlineLoaders = request.split('!');//[inline-loader1,inline-loader2,./index.js]
+
+//最前面的前缀去掉,多个!合并成一个
+let inlineLoaders = request.replace(/^-?!+/, "").replace(/!!+/g, "!").split("!");
 
 let resource = inlineLoaders.pop(); //获取要加载资源的入口 resource = './index.js'
 
+console.log('resource=',resource);
 
 const resolveLoaderPath = (loader) => path.resolve(loadDir, loader);
 /**
@@ -81,14 +87,29 @@ preLoaders = preLoaders.map(resolveLoaderPath);
 postLoaders = postLoaders.map(resolveLoaderPath);
 normalLoaders = normalLoaders.map(resolveLoaderPath);
 
-let allLoaders = [
-  ...postLoaders,
-  ...inlineLoaders,
-  ...normalLoaders,
-  ...preLoaders,
-];
+let allLoaders = [];
+if(request.startsWith("!!")){  //不要前后置和普通 loader,只要内联 loader
+  allLoaders = inlineLoaders;
+}
+else if(request.startsWith("-!")){//不要前置和普通loader
+  allLoaders = [...postLoaders,...inlineLoaders];
+}
+else if(request.startsWith('!')) { //不要普通 loader
+  allLoaders =[...postLoaders,...inlineLoaders,...preLoaders]
+}
+else{
+  allLoaders = [
+    ...postLoaders,
+    ...inlineLoaders,
+    ...normalLoaders,
+    ...preLoaders,
+  ]
+}
 
-console.log('allLoaders=',allLoaders);
+
+
+
+//console.log('allLoaders=',allLoaders);
 
 
 
@@ -100,9 +121,10 @@ runLoaders({
   resource:path.resolve(__dirname,resource),
   readResource: fs.readFile.bind(fs)
 },(error,data)=>{
-  console.log("data=", data, "error,", error);
+ // console.log("data=", data, "error,", error);
    if(data.cacheable){
       cacheMap[path.join(__dirname,resource)]=data.result;
     } 
 });
+
 console.log("cacheMap=", cacheMap);
