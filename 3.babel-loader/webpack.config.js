@@ -7,6 +7,7 @@ const FileManagerPlugin = require("filemanager-webpack-plugin"); //文件管理�
 
 const babelLoader = path.join(__dirname,'loaders/babel-loader.js'); //引入自定义的Loader
 const fileLoader = path.join(__dirname,'loaders/file-loader.js') ;//引入自定义的file-loader
+const urlLoader = path.join(__dirname,'loaders/url-loader.js') ;//引入自定义的file-loader
 
 console.log("fileLoader=", fileLoader, "babelLoader=", babelLoader);
 
@@ -14,7 +15,7 @@ module.exports = {
   //开发服务器的配置
   devServer: {
     port: 3000,
-    contentBase: "./fileLoaderDemo",
+    contentBase: "./urlLoaderDemo",
     progress: true, //进度条
     compress: true, //启动压缩
   },
@@ -29,14 +30,15 @@ module.exports = {
   //devtool: false, // 判断是生产环境时，可配置改选项
 
   //entry: "./src/index.js", //打包的入口
-  entry: "./src/file-loader.js", //打包的入口
+  entry: "./src/url-loader.js", //打包的入口
   output: {
     //打包的出口
     filename: "bundles.js",
-    path: path.resolve(__dirname, "fileLoaderDemo"), //必须是一个绝对路径
+    path: path.resolve(__dirname, "urlLoaderDemo"), //必须是一个绝对路径
   },
   module: {
     rules: [
+      /*
       {
         test: /\.(png|jpeg|jpg|gif)$/,
         use: [
@@ -49,6 +51,22 @@ module.exports = {
           },
         ],
       },
+      */
+
+      {
+        test: /\.(png|jpeg|jpg|gif)$/,
+        use: [
+          {
+            //loader: "url-loader", //官方的url-loader
+            loader: urlLoader, //自定义的url-loader
+            options: {
+              filename: "[hash].[ext]",
+              limit: 30 * 1024, //超过30kb之后就通过file-loader来产生真实的图片
+            },
+          },
+        ],
+      },
+
       {
         test: /\.js$/,
         use: [
