@@ -27,7 +27,29 @@ function parsePathQueryFragment(resource) {
 
 }
 //parsePathQueryFragment(testResoure);
-
+function runSyncOrAsync(fn, context, args, callback) {
+  let isSync = true; //默认是同步
+  let isDone = false; //是否完成,是否执行过此函数了,默认是false
+  //调用context.async this.async 可以把同步把异步,表示这个loader里的代码是异步的
+  context.async = function () {
+    isSync = false; //改为异步
+    return innerCallback;
+  };
+  const innerCallback = (context.callback = function () {
+    isDone = true; //表示当前函数已经完成
+    isSync = false; //改为异步
+    callback.apply(null, arguments); //执行 callback
+  });
+  //第一次fn=pitch1,执行pitch1
+  console.log("fn=", fn);
+  debugger;
+  let result = fn.apply(context, args);
+  //在执行pitch2的时候,还没有执行到pitch1 这行代码
+  if (isSync) {
+    isDone = true;
+    return callback(null, result);
+  }
+}
 
 /**
 loaders= [
@@ -78,6 +100,48 @@ function loadLoader(loader) {
     loader.pitch = module.pitch;
     loader.raw = module.raw;
 }
+function convertArgs(args, raw) {
+  if (!raw && Buffer.isBuffer(args[0])) args[0] = args[0].toString("utf-8");
+  else if (raw && typeof args[0] === "string")
+    args[0] = Buffer.from(args[0], "utf-8");
+}
+function processResource(options, loaderContext, callback) {
+  loaderContext.loaderIndex = loaderContext.loaders.length - 1;
+  var resourcePath = loaderContext.resourcePath;
+  if (resourcePath) {
+    options.readResource(resourcePath, function (err, buffer) {
+      if (err) return callback(err);
+      options.resourceBuffer = buffer;
+      iterateNormalLoaders(options, loaderContext, [buffer], callback);
+    });
+  } else {
+    iterateNormalLoaders(options, loaderContext, [null], callback);
+  }
+}
+
+function iterateNormalLoaders(options, loaderContext, args, callback) {
+  if (loaderContext.loaderIndex < 0) return callback(null, args);
+
+  var currentLoaderObject = loaderContext.loaders[loaderContext.loaderIndex];
+  if (currentLoaderObject.normalExecuted) {
+    loaderContext.loaderIndex--;
+    return iterateNormalLoaders(options, loaderContext, args, callback);
+  }
+
+  var fn = currentLoaderObject.normal;
+  currentLoaderObject.normalExecuted = true;
+  if (!fn) {
+    return iterateNormalLoaders(options, loaderContext, args, callback);
+  }
+
+  convertArgs(args, currentLoaderObject.raw);
+
+  runSyncOrAsync(fn, loaderContext, args, function (err) {
+    if (err) return callback(err);
+    var args = Array.prototype.slice.call(arguments, 1);
+    iterateNormalLoaders(options, loaderContext, args, callback);
+  });
+}
 
 /**
  * 迭代每个loader的pitch方法
@@ -86,23 +150,51 @@ function loadLoader(loader) {
  * @param {*} _callback 
  */
 function iteratePitchingLoaders(options,loaderContext,_callback){
-    console.log('88行---开始迭代每个loader中的pitch方法，传入的loaderContext = ',loaderContext);
-    //获取当前对js文件编译的loader
-    let currentLoader = loaderContext.loaders[loaderContext.loaderIndex];
-    if(currentLoader.pitchExecuted) { //如果当前的loader.pitchExecute = true ,说明这个loader已经被执行过了，则要开始执行下一个loader
-        loaderContext.loaderIndex ++;
-        return iteratePitchingLoaders(options,loaderContext,_callback);
-    }
+  //最后一个loader就结束了,开始读取模块内容
+  if (loaderContext.loaderIndex >= loaderContext.loaders.length){
+    return processResource(options, loaderContext, _callback);
+  }
+  console.log(
+    "88行---开始迭代每个loader中的pitch方法，传入的loaderContext = ",
+    loaderContext
+  );
+  //获取当前对js文件编译的loader
+  let currentLoader = loaderContext.loaders[loaderContext.loaderIndex];
+  if (currentLoader.pitchExecuted) {
+    //如果当前的loader.pitchExecute = true ,说明这个loader已经被执行过了，则要开始执行下一个loader
+    loaderContext.loaderIndex++;
+    return iteratePitchingLoaders(options, loaderContext, _callback);
+  }
 
-    loadLoader(currentLoader);
-    let currentLoaderPitchFun = currentLoader.pitch;
-    console.log('currentLoaderPitchFun=',currentLoaderPitchFun.toString());
-    currentLoader.pitchExecuted = true ;//表示当前loader的pitch函数已经执行过了
+  loadLoader(currentLoader);
+  let currentLoaderPitchFun = currentLoader.pitch;
+  //console.log('currentLoaderPitchFun=',currentLoaderPitchFun.toString());
+  currentLoader.pitchExecuted = true; //表示当前loader的pitch函数已经执行过了
 
-    //如果当前的loader不存在pitch函数，则要开始执行下一个loader
-    if(!currentLoaderPitchFun){
-        return iteratePitchingLoaders(options,loaderContext,_callback);
+  //如果当前的loader不存在pitch函数，则要开始执行下一个loader
+  if (!currentLoaderPitchFun) {
+    return iteratePitchingLoaders(options, loaderContext, _callback);
+  }
+
+  runSyncOrAsync(
+    currentLoaderPitchFun,
+    loaderContext,
+    [
+      loaderContext.remainingRequest,
+      loaderContext.previousRequest,
+      (currentLoader.data = {}),
+    ],
+    function (err, args) {
+      //为了支持同步和异步,可以基于参数的值决定是否继续pitching流程,只要有一个参数不为undefined就可以
+      //如果有参数
+      if (args) {
+        loaderContext.loaderIndex--; //索引减1,开始回退了
+        iterateNormalLoaders(options, loaderContext, args, _callback);
+      } else {
+        iteratePitchingLoaders(options, loaderContext, _callback);
+      }
     }
+  );
 }
 
 

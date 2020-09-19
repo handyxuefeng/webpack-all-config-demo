@@ -12,7 +12,7 @@ const loadDir = path.resolve(__dirname,'loaders');//loader的目录
 //const {runLoaders} = require('loader-runner'); //webpack自带的
 const runLoaders = require('./loader-runner'); //webpack自带的
 //let request = '-!inline-loader1!inline-loader2!./src/index.js?k=1#top';
-let request = '!!inline-loader1!inline-loader2!./src/index.js';
+let request = "!!async-loader1!async-loader2!./src/index.js";
 
 //let inlineLoaders = request.split('!');//[inline-loader1,inline-loader2,./index.js]
 
@@ -121,7 +121,7 @@ runLoaders({
   resource:path.resolve(__dirname,resource),
   readResource: fs.readFile.bind(fs)
 },(error,data)=>{
- // console.log("data=", data, "error,", error);
+   console.log("data=", data, "error,", error);
    if(data.cacheable){
       cacheMap[path.join(__dirname,resource)]=data.result;
     } 
