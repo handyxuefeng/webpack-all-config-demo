@@ -7,15 +7,18 @@ const FileManagerPlugin = require("filemanager-webpack-plugin"); //文件管理�
 
 const babelLoader = path.join(__dirname,'loaders/babel-loader.js'); //引入自定义的Loader
 const fileLoader = path.join(__dirname,'loaders/file-loader.js') ;//引入自定义的file-loader
-const urlLoader = path.join(__dirname,'loaders/url-loader.js') ;//引入自定义的file-loader
+const urlLoader = path.join(__dirname,'loaders/url-loader.js') ;//引入自定义的url-loader
+const lessLoader = path.join(__dirname,'loaders/less-loader.js') ;//引入自定义的less-loader
+const styleLoader = path.join(__dirname, "loaders/style-loader.js"); //引入自定义的style-loader
 
-console.log("fileLoader=", fileLoader, "babelLoader=", babelLoader);
+
+
 
 module.exports = {
   //开发服务器的配置
   devServer: {
     port: 3000,
-    contentBase: "./urlLoaderDemo",
+    contentBase: "./less-style-loader-demo",
     progress: true, //进度条
     compress: true, //启动压缩
   },
@@ -30,11 +33,13 @@ module.exports = {
   //devtool: false, // 判断是生产环境时，可配置改选项
 
   //entry: "./src/index.js", //打包的入口
-  entry: "./src/url-loader.js", //打包的入口
+  //entry: "./src/url-loader.js", //打包的入口
+  entry: "./src/less-style-loader.js", //打包的入口
+
   output: {
     //打包的出口
     filename: "bundles.js",
-    path: path.resolve(__dirname, "urlLoaderDemo"), //必须是一个绝对路径
+    path: path.resolve(__dirname, "less-style-loader-demo"), //必须是一个绝对路径
   },
   module: {
     rules: [
@@ -120,15 +125,25 @@ module.exports = {
         ],
       },
       //less文件的处理
+      /*
       {
         test: /\.less$/,
         use: [
           MiniCssExtractPlugin.loader, //抽离样式
           "css-loader",
-          "less-loader",
+          "less-loader",  //官方的less-loader
           "postcss-loader",
         ],
       },
+      */
+      {
+        test: /\.less$/,
+        use: [
+          styleLoader, //自定义的style-loader
+          lessLoader, //自定义的lessLoader
+        ],
+      },
+
       //sass文件的处理
       {
         test: /\.s[ac]ss$/i,
