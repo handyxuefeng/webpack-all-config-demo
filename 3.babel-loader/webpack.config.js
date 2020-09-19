@@ -6,12 +6,15 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const FileManagerPlugin = require("filemanager-webpack-plugin"); //文件管理的插件
 
 const babelLoader = path.join(__dirname,'loaders/babel-loader.js'); //引入自定义的Loader
+const fileLoader = path.join(__dirname,'loaders/file-loader.js') ;//引入自定义的file-loader
+
+console.log("fileLoader=", fileLoader, "babelLoader=", babelLoader);
 
 module.exports = {
   //开发服务器的配置
   devServer: {
     port: 3000,
-    contentBase: "./dist",
+    contentBase: "./fileLoaderDemo",
     progress: true, //进度条
     compress: true, //启动压缩
   },
@@ -25,28 +28,41 @@ module.exports = {
   //devtool: "cheap-module-source-map",
   //devtool: false, // 判断是生产环境时，可配置改选项
 
-  entry: "./src/index.js", //打包的入口
+  //entry: "./src/index.js", //打包的入口
+  entry: "./src/file-loader.js", //打包的入口
   output: {
     //打包的出口
     filename: "bundles.js",
-    path: path.resolve(__dirname, "dist"), //必须是一个绝对路径
+    path: path.resolve(__dirname, "fileLoaderDemo"), //必须是一个绝对路径
   },
   module: {
     rules: [
       {
+        test: /\.(png|jpeg|jpg|gif)$/,
+        use: [
+          {
+            //loader: "file-loader",
+            loader: fileLoader, //自定义的file-loader
+            options: {
+              filename: "[hash].[ext]",
+            },
+          },
+        ],
+      },
+      {
         test: /\.js$/,
         use: [
           {
-            loader: 'source-map-loader',
+            loader: "source-map-loader",
             options: {},
           },
         ],
-        enforce:'pre',
+        enforce: "pre",
         exclude: /node_modules/,
       },
 
       //js文件的编译
-    
+
       {
         test: /\.js$/,
         use: [
@@ -57,7 +73,7 @@ module.exports = {
         ],
         exclude: /node_modules/,
       },
-      
+
       //这个是官方babel-loader，对es6-10的转义
       /*
       {
@@ -71,7 +87,7 @@ module.exports = {
         exclude:/node_modules/i
       },
       */
-    
+
       //配置样式文件的处理css-loader 处理css中 @import
       // style-loader  把css插入到head标签中
       // loader的执行顺序是从右至左执行
