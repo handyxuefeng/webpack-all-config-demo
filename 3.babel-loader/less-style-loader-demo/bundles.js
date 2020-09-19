@@ -86,6 +86,17 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./loaders/less-loader.js!./src/testLess.less":
+/*!****************************************************!*\
+  !*** ./loaders/less-loader.js!./src/testLess.less ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "#root {\n  color: red;\n  padding: 10px;\n  border: 1px solid blue;\n}\n"
+
+/***/ }),
+
 /***/ "./src/less-style-loader.js":
 /*!**********************************!*\
   !*** ./src/less-style-loader.js ***!
@@ -107,14 +118,13 @@ document.getElementById('root').innerHTML = Date.now() * 1;
   !*** ./src/testLess.less ***!
   \***************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 
-    let style = document.createElement('style');
-    style.innerHTML = "#root {\n  color: red;\n  padding: 10px;\n  border: 1px solid blue;\n}\n";
+    var style = document.createElement("style");
+    style.innerHTML = __webpack_require__(/*! !../loaders/less-loader.js!./testLess.less */ "./loaders/less-loader.js!./src/testLess.less");
     document.head.appendChild(style);
-    module.exports = '';
-  
+ 
 
 /***/ })
 

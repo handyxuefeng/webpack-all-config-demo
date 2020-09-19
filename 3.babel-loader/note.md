@@ -95,3 +95,17 @@ yarn add source-map-loader -D
 - normal-loader 普通loader
 - inline-loader 行内loader
 - post-loader 后置loader
+
+## 实现file-loader & url-loader
+- file-loader
+- url-loader
+
+## 居于less 实现less-loader， style-loader的是实现
+
+## 两个左侧模块的连用
+- css-loader
+  - 如何实现两个最左侧loader的连用
+  - remainingRequest  data 这些参数有什么用
+  - pitch 有什么用，什么时候用
+
+- css-loader  用来处理css中的import 和 url()
