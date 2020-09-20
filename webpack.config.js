@@ -71,7 +71,7 @@ module.exports = {
         use: [
           MiniCssExtractPlugin.loader, //抽离样式
           "css-loader",
-          "less-loader",
+          "less-loader", // 官方的less-loader
           "postcss-loader",
         ],
         exclude: /node_modules/,
