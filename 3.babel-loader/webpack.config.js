@@ -10,6 +10,8 @@ const fileLoader = path.join(__dirname,'loaders/file-loader.js') ;//引入自定
 const urlLoader = path.join(__dirname,'loaders/url-loader.js') ;//引入自定义的url-loader
 const lessLoader = path.join(__dirname,'loaders/less-loader.js') ;//引入自定义的less-loader
 const styleLoader = path.join(__dirname, "loaders/style-loader.js"); //引入自定义的style-loader
+const cssLoader = path.join(__dirname, "loaders/css-loader.js"); //引入自定义的css-loader
+
 
 
 
@@ -115,6 +117,7 @@ module.exports = {
       // style-loader  把css插入到head标签中
       // loader的执行顺序是从右至左执行
       // loader 还可以写成对象形式
+      /* 下面是官方的配置
       {
         test: /\.css$/,
         // 1.第一种配置方式
@@ -122,6 +125,16 @@ module.exports = {
           MiniCssExtractPlugin.loader, //抽离样式
           "css-loader",
           "postcss-loader",
+        ],
+      },
+      */
+
+      {
+        test: /\.css$/,
+        // 1.引入自定义的插件
+        use: [
+          styleLoader,
+          cssLoader,
         ],
       },
       //less文件的处理
