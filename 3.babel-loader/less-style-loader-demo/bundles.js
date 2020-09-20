@@ -93,7 +93,7 @@
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "#root {\n  color: red;\n  padding: 10px;\n  border: 1px solid blue;\n}\n"
+module.exports = "#root {\n  color: #972874;\n  padding: 20px;\n  border: 1px solid blue;\n}\n"
 
 /***/ }),
 
@@ -109,7 +109,20 @@ module.exports = "#root {\n  color: red;\n  padding: 10px;\n  border: 1px solid 
 
 __webpack_require__(/*! ./testLess.less */ "./src/testLess.less");
 
+__webpack_require__(/*! ./testImportCss.css */ "./src/testImportCss.css");
+
 document.getElementById('root').innerHTML = Date.now() * 1;
+
+/***/ }),
+
+/***/ "./src/testImportCss.css":
+/*!*******************************!*\
+  !*** ./src/testImportCss.css ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// extracted by mini-css-extract-plugin
 
 /***/ }),
 

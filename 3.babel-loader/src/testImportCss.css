@@ -1,0 +1,12 @@
+@import "./global.css";
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    background-image: url("./season.jpeg");
+    background-size: cover;
+}
+
+div {
+    color: red;
+}
