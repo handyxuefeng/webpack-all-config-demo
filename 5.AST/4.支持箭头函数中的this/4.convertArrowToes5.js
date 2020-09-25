@@ -1,6 +1,8 @@
 /**
  * 通过@babel/parse 
  * 1.安装 yarn add @babel/core babel-types @babel/plugin-transform-arrow-functions -D
+ * 
+ * 
  */
 let babel = require('@babel/core');//把es6语法转换成AST语法
 let t = require('babel-types'); //类型判断某个节点是否是某种类型，或者创建一个新的某种类型的节点
@@ -10,6 +12,16 @@ let code = `
     return a+b;
   }
 `;
+
+/**
+ *  上面代码要转换成的目标代码
+  var _this = this;
+  const sum = function (a, b) {
+    console.log(_this);
+    return a + b;
+  };
+ */
+
 let arrowFunctionPlugin = require('@babel/plugin-transform-arrow-functions');
 
 //官方的转换写法
