@@ -257,3 +257,26 @@ moudule.exports = {
 yarn add glob-all purifycss-webpack -D 
 
 ```
+
+## AST 各种语言都可以通过对应parse工具，转换为对应的ast
+- JavaScript Parser 
+  - JavaScript Parser，把 js 源码转化为抽象语法树的解析器。
+  - 浏览器会把 js 源码通过解析器转为抽象语法树，再进一步转化为字节码或直接生成机器码。
+  - 一般来说每个 js 引擎都会有自己的抽象语法树格式，Chrome 的 v8 引擎，firefox 的 SpiderMonkey 引擎等等，MDN 提供了详细 SpiderMonkey AST format 的详细说明，算是业界的标准。
+
+## 常用的 JavaScript Parser 
+- esprima
+- traceur
+- acorn
+- shift
+
+### esprima
+  - 通过 esprima 把源码转化为 AST
+  - 通过 estraverse 遍历并更新 AST
+  - 通过 escodegen 将 AST 重新生成源码
+  - astexplorer AST 的可视化工具  astexplorer.net
+
+```
+yarn add webpack webpack-cli esprima estraverse escodegen -D
+
+```
