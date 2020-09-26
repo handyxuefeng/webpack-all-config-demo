@@ -4,7 +4,8 @@ module.exports = {
   entry: {
     main: "./src/index.js",
   },
-  mode: "development",
+  //mode: "development",
+  mode: "production",
   output: {
     filename: "tree-shaking.js",
     path: path.resolve(__dirname, "dist"),
@@ -18,7 +19,10 @@ module.exports = {
           options: {
             plugins: [
               //["import",{libraryName:'lodash'}]
-              [path.resolve(__dirname,"plugins/babel-plugin-import.js"), { libraries:['lodash']}],
+              [
+                path.resolve(__dirname, "plugins/babel-plugin-import.js"),
+                { libraries: ["lodash"] },
+              ],
             ],
           },
         },

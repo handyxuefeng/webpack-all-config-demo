@@ -15,6 +15,9 @@ let treeShakingPlugin = {
        * 根据webpack.config.js中 配置的 规则，查看自定义的属性{libraries:['lodash']},看是对那些库最tree-shaking
        */
       if(states.opts.libraries.includes(source.value)) {
+
+        console.log("开始把ast语法树转换=", source.value);
+
         let newSpecifiers = specifiers.map((specifier) => {
           //t.importDeclaration(specifiers, source)
           //t.stringLiteral(value)
