@@ -24,7 +24,7 @@ class AutoExternalPlugin {
     constructor(opts) {
         this.opts = opts;
         this.usedExternalModules = new Set();
-        console.log('this.opts = ', this.opts);
+        //console.log('this.opts = ', this.opts);
     }
     //webpack调用插件的入口方法，webpack会传递compiler对象过来
     apply(compiler) {
@@ -111,7 +111,7 @@ class AutoExternalPlugin {
                     }
                 }
 
-                console.log('usedExternalModules = ',usedExternalModules ,'insertScripts=',insertScripts);
+                //console.log('usedExternalModules = ',usedExternalModules ,'insertScripts=',insertScripts);
 
 
                 //向HtmlWebpackPlugin 的assetTags 对象scripts 对象中插入要插入的对象,从而完成在html中插入在webpack.config.js中配置的要插入的外链脚本
