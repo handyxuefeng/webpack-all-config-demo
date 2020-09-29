@@ -8,4 +8,4 @@ let obj = {
         url: "https://cdn.bootcdn.net/ajax/libs/lodash.js/0.1.0/lodash.js"
     }
 };
-console.log(Object.values(obj));
+console.log(Object.values(obj),'=',Object.keys(obj));
