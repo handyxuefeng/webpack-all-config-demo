@@ -3,9 +3,10 @@ module.exports = {
     context:process.cwd(), //文件根目录
     mode:"development",
     devtool:false,
-    entry:{
-        main:'./src/index.js'
-    },
+    // entry:{
+    //     main:'./src/index.js'
+    // },
+    entry:'./src/index.js',
     output:{
         filename:"bundle.js",
         path:path.resolve(__dirname,'dist')

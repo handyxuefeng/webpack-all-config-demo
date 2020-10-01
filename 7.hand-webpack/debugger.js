@@ -8,13 +8,13 @@ const compiler = webpack(webpackOptions);
 
 
 debugger;
-compiler.run((err, stats) => {
+compiler.run((err, statsInstance) => {
   console.log(err);
-  let obj = stats.toJson({
+  let obj = statsInstance.toJson({
     entries: true, //编译的入口文件
-    chunks: true,  //代码块
+    chunks: true, //代码块
     modules: true, //打包模块的数组
-    assets: true,   //打包后的产出的文件
-  }); 
-  console.log('3.编译结果，obj = ',obj);
+    assets: true, //打包后的产出的文件
+  });
+  console.log("3.编译结果，obj = ", obj);
 });
