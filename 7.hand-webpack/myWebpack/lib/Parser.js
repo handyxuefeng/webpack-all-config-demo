@@ -9,7 +9,6 @@ class Parser extends Tapable{
             sourceType:'module', //源代码是一个模块
             plugins:['dynamicImport'] //额外一个插件，支持import('./title.js')
         });
-        console.log('ast = ',ast);
         return ast;
     }
 }
