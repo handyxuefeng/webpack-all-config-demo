@@ -1,10 +1,5 @@
-const OptionsApply = require('./OptionsApply');
 const EntryOptionPlugin = require('./node/EntryOptionPlugin');
-
-class WebpackOptionsApply extends OptionsApply {
-    constructor(){
-        super();
-    }
+class WebpackOptionsApply  {
     /**
      * 实现父类OptionsApply中的process方法
      * @param {*} options 
@@ -16,7 +11,6 @@ class WebpackOptionsApply extends OptionsApply {
      */
     process(options, compiler) {
         new EntryOptionPlugin().apply(compiler); //注册插件
-
         /**
          * 触发钩子
          * context  上下文路径，跟目录

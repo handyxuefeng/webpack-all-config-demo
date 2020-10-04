@@ -12,6 +12,7 @@
     }
 }
 */
+const path = require("path");
 const {
   Tapable,
   AsyncSeriesHook,
@@ -22,6 +23,8 @@ const {
 const NormalModuleFactory = require("./NormalModuleFactory");
 const Compilation = require("./Compilation");
 const Stats = require("./Stats");
+const mkdirp = require("mkdirp"); //递归创建文件夹
+
 class Compiler extends Tapable {
   constructor(context) {
     super();
@@ -44,42 +47,40 @@ class Compiler extends Tapable {
       make: new AsyncParallelHook(["compilation"]),
 
       failed: new SyncHook(["error"]),
+
+      emit: new AsyncSeriesHook(["compilation"]), //发射，写入
     };
   }
-  /**
-     * 
-     * @param {*} callback 
-     * callback = (err, stats) => {
-            console.log(err);
-            console.log(
-                stats.toJson({
-                entries: true,
-                chunks: true,
-                modules: true,
-                _modules: true,
-                assets: true,
-                })
-            );
-        }
-     */
-  run(callback) {
-    let stats = {
-      toJson: () => ({
-        entries: [], //显示所有的入口
-        chunks: [], //显示所有的代码块
-        modules: [], //显示所有模块
-        assets: [], // 显示所有打包后的资源，也就是文件
-      }),
+  emitAssets(compilation,runCallback){
+    //编译完成后，开始把chunks写入到硬盘
+    const emitFiles = (err) => {
+       const assets = compilation.assets;
+       const outputPath = this.options.output.path;
+       for(let file in assets){
+         let source = assets[file];
+         ///Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/dist/bundle.js
+         let targetPath = path.posix.join(outputPath, file);
+         this.outputFileSystem.writeFileSync(targetPath, source, "utf8");
+       }
+       runCallback();
     };
-    console.log("2.webpack 开始编译");
 
-    const finalCallback = (err, statsInstance) => {
-      callback(err, statsInstance);
-    };
+    this.hooks.emit.callAsync(compilation, () => {
+      //先创建文件输出目录dist，再写入内容
+      console.log("this.options.output.path = ", this.options.output.path);
+      mkdirp(this.options.output.path, emitFiles);
+    });
+  }
+  run(callback) {
+    console.log("2.webpack 开始编译");
     const onCompiled = (err, compilation) => {
-      let statsInstance = new Stats(compilation);
-      finalCallback(err, statsInstance); //TODO
-    };
+       this.emitAssets(compilation,err=>{
+         let stats = new Stats(compilation);
+         this.hooks.done.callAsync(stats,err=>{
+            callback(err,stats);
+         });
+       });
+    }
 
     //1.先触发beforeRun的钩子
     this.hooks.beforeRun.callAsync(this, (error) => {
@@ -109,7 +110,14 @@ class Compiler extends Tapable {
        *  3.触发compiler.make钩子
        */
       this.hooks.make.callAsync(compilation, (err) => {
-        onCompiled(err, compilation);
+        console.log("make 完成");
+        //开始封装chunk
+        compilation.seal((err) => {
+          //触发编译完成的钩子
+          this.hooks.afterCompile.callAsync(compilation, (err) => {
+            onCompiled(err, compilation);
+          });
+        });
       });
     });
   }

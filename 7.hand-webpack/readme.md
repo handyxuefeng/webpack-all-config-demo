@@ -22,3 +22,10 @@ yarn add babel-types babel-generator babel-traverse neo-async -D
 
 ```
 
+## webpack 实现emit，把文件写到硬盘上
+- require('mkdirp') 递归创建文件夹
+- webpack 本身是通过拼接字符串的模式，这里采用ejs模板来实现
+```
+yarn add ejs -D
+```
+

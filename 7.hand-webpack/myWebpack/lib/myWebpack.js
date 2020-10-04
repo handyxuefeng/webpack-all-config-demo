@@ -1,7 +1,7 @@
 let Compiler = require('./Compiler');  
 let NodeEnvironmentPlugin = require('./node/NodeEnvironmentPlugin'); //引入文件系统插件
 let WebpackOptionsApply = require('./WebpackOptionsApply'); 
-const webpack = (options, callback) => {
+const webpack = (options) => {
     let compiler = new Compiler(options.context);  //1.创建一个compiler实列
     compiler.options = options;  //2. 把webpack.config.js的配置项赋给compiler.options
     let  nodeEnvironmentPlugin = new NodeEnvironmentPlugin(options);
@@ -14,12 +14,9 @@ const webpack = (options, callback) => {
         }
     }
     //通过WebpackOptionsApply类合并默认配置和webpack.config.js中配置
-    compiler.options = new WebpackOptionsApply().process(options,compiler);
+    new WebpackOptionsApply().process(options,compiler);
 
     return compiler;
-
-
-
 }
 
 exports = module.exports = webpack;

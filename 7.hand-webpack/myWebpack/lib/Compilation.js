@@ -1,13 +1,16 @@
 
 const { SyncHook } = require('tapable');
+const path = require("path");
 const NormalModuleFactory = require('./NormalModuleFactory');
 const normalModuleFactory = new NormalModuleFactory();
 const Parser = require('./Parser');
 const neoAsync =  require('neo-async'); //类似promise-all的工具
-
-
+const ejs = require('ejs');
+const fs = require('fs');
 const parser = new Parser();
-const path = require('path');
+const Chunk = require('./Chunk');
+const mainTemplate = fs.readFileSync(path.posix.join(__dirname,'template','main.ejs'),'utf8');
+const EjsRender = ejs.compile(mainTemplate);
 class Compilation {
   constructor(compiler) {
     this.compiler = compiler;
@@ -18,9 +21,20 @@ class Compilation {
     this.entries = []; //打包入口的数组
     this.modules = []; // 模块的数组，包括打包入口的模块和依赖的模块，也即是所有.js文件都放在这里
     this._modules = {}; // key = moduleId   值为对应模块的源代码
+    this.chunks = [];
+    this.files = [];//这里存放本次编译产生的所有文件名
+    this.assets = {};
     this.hooks = {
       //每次构建完成一个模块后，就会触发此钩子执行
       succeed: new SyncHook(["module"]),
+      //封装代码的构造钩子
+      seal: new SyncHook([]),
+
+      //封装chunk之前
+      beforeChunks: new SyncHook([]),
+
+      //封装chunk之后
+      afterChunks: new SyncHook(["chunks"]),
     };
   }
   /**
@@ -67,7 +81,7 @@ class Compilation {
     this.createModule(
       data,
       (entryModule) => {
-        this.modules.push(entryModule); // 给普通模块数组添加一个模块
+        this.entries.push(entryModule); // 给普通模块数组添加一个模块
       },
       addEntryCallback
     );
@@ -142,6 +156,44 @@ class Compilation {
       afterBuildCallback(err, entryModule);
     });
   }
-  seal() {}
+  /**
+   * 封装代码chunk
+   * @param {*} callback 
+   */
+  seal(callback) {
+     this.hooks.seal.call();
+     this.hooks.beforeChunks.call();// 开始准备封装代码块
+
+     /**
+      * 每个入口会生成一个代码块
+      */
+     for(const entryModule of this.entries){
+       let chunk = new Chunk(entryModule);
+       this.chunks.push(chunk);
+       
+       //对所有模块进行过滤，找出本chunk中包含的模块
+       chunk.modules = this.modules.filter(module=>module.name===chunk.name);
+     }
+     this.hooks.afterChunks.call(this.chunks);
+     this.createChunkAssets(); //生成代码之后，要生成代码块对应的资源
+     callback();
+
+
+  }
+  createChunkAssets(){
+    for(let chunk of this.chunks){
+        const filename = chunk.name + '.js';  //得到文件名
+        chunk.files.push(filename);
+        let source = EjsRender({
+          entryModuleId: chunk.entryModule.moduleId, // './src/index.js'
+          modules: chunk.modules, //[{moduleId:'./src/index.js'},{moduleId:'./src/title.js'}]
+        });
+        this.emitAssets(filename,source);
+    }
+  }
+  emitAssets(filename,source) {
+     this.assets[filename] = source;
+     this.files.push(filename);
+  }
 }
 exports = module.exports = Compilation;

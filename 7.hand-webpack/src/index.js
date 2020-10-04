@@ -1,4 +1,3 @@
 let title = require('./title.js');
-//let operate = require('./operate.js');
-
+console.log('title = ',title);
 

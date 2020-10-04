@@ -72,7 +72,7 @@ class NormalModule {
             let extensionName =
               requireScriptName.split(path.posix.sep).pop().indexOf(".") == -1
                 ? ".js"
-                : ""; //path.posix.sep = /
+                : ""; 
 
             /**
              *  1. 得到index.js文件所在的目录 = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src
