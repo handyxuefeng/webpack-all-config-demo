@@ -29,3 +29,7 @@ yarn add babel-types babel-generator babel-traverse neo-async -D
 yarn add ejs -D
 ```
 
+## webpack的懒加载实现步骤
+- 先把代码转换为AST语法树
+- 找出动态import节点
+- 找到动态导入的模块的名称

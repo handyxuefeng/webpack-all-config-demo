@@ -1,1 +1,2 @@
-module.exports = Date.now()*1;
+let innerTitle = require('./inner_title')
+module.exports = `title____${Date.now() * 1}_____${innerTitle}`;

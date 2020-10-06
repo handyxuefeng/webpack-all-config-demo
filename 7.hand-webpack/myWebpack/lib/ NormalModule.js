@@ -2,7 +2,7 @@ const path = require("path");
 const t = require("babel-types"); //babel-types-api 用于 AST 节点的 Lodash 式工具库, 它包含了构造、验证以及变换 AST 节点的方法，对编写处理 AST 逻辑非常有用，https://babeljs.io/docs/en/next/babel-types.html
 const generate = require("babel-generator").default; // 把ast重新生成js代码
 const traverse = require("babel-traverse").default; //  用于对 AST 的遍历，维护了整棵树的状态，并且负责替换、移除和添加节点
-
+const neoAsync = require("neo-async"); //类似promise-all
 class NormalModule {
   /**
    * name = 'main'
@@ -12,7 +12,15 @@ class NormalModule {
    * parser = @babel/parser ,用来生成抽象语法树
    * @param {*} param0
    */
-  constructor({ name, entry, context, resource, parser,moduleId }) {
+  constructor({
+    name,
+    entry,
+    context,
+    resource,
+    parser,
+    moduleId,
+    async,
+  }) {
     this.name = name;
     this.entry = entry;
     this.context = context;
@@ -31,6 +39,12 @@ class NormalModule {
 
     //收集模块的依赖
     this.dependencies = [];
+
+    //收集当前模块依赖哪些异步模块 import(哪些模块)
+    this.blocks = []; //
+
+    //表示当前的模块是一个异步代码块，还是一个同步代码块
+    this.async = async;
   }
   /**
    * 模块的编译方法
@@ -47,17 +61,7 @@ class NormalModule {
        * 2.遍历ast语法树，分析打包模块的存在的import，require依赖，并收集依赖
        * - 收集 require 依赖
        * - 收集 import 依赖
-       node.body[0].declarations[0].init.callee.name;
        */
-      /*
-      traverse(this._ast, {
-        Program(path) {
-          let node = path.node;
-          console.log("node=", node);
-        },
-      });
-      */
-
       traverse(this._ast, {
         CallExpression: (pathNode) => {
           let node = pathNode.node;
@@ -67,12 +71,13 @@ class NormalModule {
 
             //如果方法名是require的话
             let requireScriptName = node.arguments[0].value; // 获取依赖的脚本的名称 requireScriptName = "./title.js"
+            console.log("遍历AST语法时，遍历到了有require的文件名为=", requireScriptName);
 
             //判断是否添加了扩展名
             let extensionName =
               requireScriptName.split(path.posix.sep).pop().indexOf(".") == -1
                 ? ".js"
-                : ""; 
+                : "";
 
             /**
              *  1. 得到index.js文件所在的目录 = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src
@@ -116,9 +121,52 @@ class NormalModule {
               rawRequest: requireScriptName, //依赖模块的名称title.js
               moduleId: depModuleId, // depModuleId = './src/title.js
               dependModuleAbsolutePath: absolutePathOfRequireSource, //依赖模块title.js的绝对路径
-              resource: absolutePathOfRequireSource
+              resource: absolutePathOfRequireSource,
             });
-            
+          }
+
+          if (node.callee.type == "Import") {
+            console.log("这里是处理代码动态导入的流程");
+            let moduleName = node.arguments[0].value; //得到 './title.js'
+            //2.判断是否添加了扩展名
+            let extensionName =
+              moduleName.split(path.posix.sep).pop().indexOf(".") == -1
+                ? ".js"
+                : "";
+            //3.获取依赖模块的绝对路径 = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src/title.js
+            let absolutePathOfRequireSource = path.posix.join(
+              path.posix.dirname(this.resource),
+              moduleName + extensionName
+            );
+
+            //4.得到模块ID
+            let depModuleId ="./" + path.posix.relative(this.context, absolutePathOfRequireSource);
+
+            /**
+             * 5. 得到 /!*webpackChunkName: "title"*!/ 注释中 title
+             */
+            let chunkName = "0";
+            if (
+              Array.isArray(node.arguments[0].leadingComments) &&
+              node.arguments[0].leadingComments.length > 0
+            ) {
+              let leadingComments = node.arguments[0].leadingComments[0].value;
+              let regexp = /webpackChunkName:\s*['"]([^'"]+)['"]/;
+              chunkName = leadingComments.match(regexp)[1];
+            }
+
+            console.log(`遍历到有import导入的语句, chunkName = ${chunkName}`);
+
+            pathNode.replaceWithSourceString(
+              `__webpack_require__.e("${chunkName}").then(__webpack_require__.t.bind(null, "${depModuleId}", 7))`
+            );
+
+            this.blocks.push({
+              context: this.context,
+              entry: depModuleId,
+              name: chunkName, //title
+              async: true,
+            });
           }
         },
       });
@@ -126,7 +174,22 @@ class NormalModule {
       //把转换后的语法树重新生成代码
       let { code } = generate(this._ast);
       this._source = code; // 覆盖原来的代码
-      callback(err);
+
+      /**
+       * 循环构建每一个通过import异步方式导入的代码块
+       * 当所有通过Import方式的导入的代码块，编译完成之后，才表示当前模块index.js编译完成
+       */
+      neoAsync.forEach(
+        this.blocks,
+        (block, done) => {
+          //done = callback
+          let { context, entry, name, async } = block;
+          compilation._addModuleChain(context, entry, name, async, done);
+        },
+        callback
+      );
+
+      //callback(err);
     });
   }
   /**

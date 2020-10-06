@@ -72,15 +72,21 @@ class Compiler extends Tapable {
     });
   }
   run(callback) {
-    console.log("2.webpack 开始编译");
+    console.log("2.webpack 执行run方法。。。。。。。");
+
+    /**
+     * onCompiled这个方法就是最终输出代码打包到dist目录的回调
+     * @param {*} err
+     * @param {*} compilation
+     */
     const onCompiled = (err, compilation) => {
-       this.emitAssets(compilation,err=>{
-         let stats = new Stats(compilation);
-         this.hooks.done.callAsync(stats,err=>{
-            callback(err,stats);
-         });
-       });
-    }
+      this.emitAssets(compilation, (err) => {
+        let stats = new Stats(compilation);
+        this.hooks.done.callAsync(stats, (err) => {
+          callback(err, stats);
+        });
+      });
+    };
 
     //1.先触发beforeRun的钩子
     this.hooks.beforeRun.callAsync(this, (error) => {
@@ -92,6 +98,9 @@ class Compiler extends Tapable {
   }
 
   compile(onCompiled) {
+    
+    console.log("3.webpack 开始编译,执行compiler.compile 方法。。。。。。。");
+
     const params = this.newCompilationParams();
     /**
      *  beforeCompile: new AsyncSeriesHook(["params"]), //编译前钩子

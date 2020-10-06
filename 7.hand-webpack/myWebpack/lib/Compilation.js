@@ -9,8 +9,14 @@ const ejs = require('ejs');
 const fs = require('fs');
 const parser = new Parser();
 const Chunk = require('./Chunk');
+
 const mainTemplate = fs.readFileSync(path.posix.join(__dirname,'template','main.ejs'),'utf8');
 const EjsRender = ejs.compile(mainTemplate);
+
+const chunkTemplate = fs.readFileSync(path.posix.join(__dirname,'template','chunkTemplate.ejs'),'utf8');
+const chunkRender = ejs.compile(chunkTemplate);
+
+
 class Compilation {
   constructor(compiler) {
     this.compiler = compiler;
@@ -22,7 +28,7 @@ class Compilation {
     this.modules = []; // 模块的数组，包括打包入口的模块和依赖的模块，也即是所有.js文件都放在这里
     this._modules = {}; // key = moduleId   值为对应模块的源代码
     this.chunks = [];
-    this.files = [];//这里存放本次编译产生的所有文件名
+    this.files = []; //这里存放本次编译产生的所有文件名
     this.assets = {};
     this.hooks = {
       //每次构建完成一个模块后，就会触发此钩子执行
@@ -48,7 +54,7 @@ class Compilation {
    * @param {*} finalCallback
    */
   addEntry(context, entry, name, finalCallback) {
-    this._addModuleChain(context, entry, name, (err, module) => {
+    this._addModuleChain(context, entry, name, false, (err, module) => {
       finalCallback(err, module);
     });
   }
@@ -58,9 +64,10 @@ class Compilation {
    * @param {*} context
    * @param {*} entry
    * @param {*} name
+   * @param {*} async 是否是异步
    * @param {*} callback
    */
-  _addModuleChain(context, entry, name, addEntryCallback) {
+  _addModuleChain(context, entry, name, async, addEntryCallback) {
     /**
      data ={
       name, //main
@@ -69,14 +76,14 @@ class Compilation {
       resource: path.posix.join(context, entry), // Users/hanxf.han/project/webpack-all-config-demo/7.hand-webpack/src/index.js
       parser,
     }
-     */
-
+    */
     let data = {
       name,
       entry,
       context,
       resource: path.posix.join(context, entry),
       parser,
+      async
     };
     this.createModule(
       data,
@@ -113,7 +120,7 @@ class Compilation {
         return addEntryCallback(err, module);
       }
     };
-   
+
     this.buildModule(newModule, afterBuild);
   }
 
@@ -128,16 +135,26 @@ class Compilation {
     let dependencies = module.dependencies;
 
     //遍历所有的依赖模块，全部开始编译，类似于AsyncParallelHook 异步并行钩子
-    neoAsync.forEach(dependencies,
+    neoAsync.forEach(
+      dependencies,
       (dependency, done) => {
-        let { name, context, rawRequest,  moduleId, dependModuleAbsolutePath,resource} = dependency;
-        let data = {
-          name,entry: rawRequest, context,
+        let {
+          name,
+          context,
+          rawRequest,
+          moduleId,
+          dependModuleAbsolutePath,
           resource,
-          moduleId, 
-          parser
+        } = dependency;
+        let data = {
+          name,
+          entry: rawRequest,
+          context,
+          resource,
+          moduleId,
+          parser,
         };
-        this.createModule(data,null,done);
+        this.createModule(data, null, done);
       },
       callback
     );
@@ -158,42 +175,59 @@ class Compilation {
   }
   /**
    * 封装代码chunk
-   * @param {*} callback 
+   * @param {*} callback
    */
   seal(callback) {
-     this.hooks.seal.call();
-     this.hooks.beforeChunks.call();// 开始准备封装代码块
+    this.hooks.seal.call();
+    this.hooks.beforeChunks.call(); // 开始准备封装代码块
 
-     /**
-      * 每个入口会生成一个代码块
-      */
-     for(const entryModule of this.entries){
-       let chunk = new Chunk(entryModule);
-       this.chunks.push(chunk);
-       
-       //对所有模块进行过滤，找出本chunk中包含的模块
-       chunk.modules = this.modules.filter(module=>module.name===chunk.name);
-     }
-     this.hooks.afterChunks.call(this.chunks);
-     this.createChunkAssets(); //生成代码之后，要生成代码块对应的资源
-     callback();
+    /**
+     * 每个入口会生成一个代码块
+     */
+    for (const entryModule of this.entries) {
+      let chunk = new Chunk(entryModule);
+      this.chunks.push(chunk);
 
-
+      //对所有模块进行过滤，找出本chunk中包含的模块
+      chunk.modules = this.modules.filter(
+        (module) => module.name === chunk.name
+      );
+    }
+    this.hooks.afterChunks.call(this.chunks);
+    this.createChunkAssets(); //生成代码之后，要生成代码块对应的资源
+    callback();
   }
-  createChunkAssets(){
-    for(let chunk of this.chunks){
-        const filename = chunk.name + '.js';  //得到文件名
-        chunk.files.push(filename);
-        let source = EjsRender({
+
+  createChunkAssets() {
+    for (let chunk of this.chunks) {
+      const filename = chunk.name + ".js"; //得到文件名
+      chunk.files.push(filename);
+      let source;
+      if(chunk.async) {
+        source = chunkRender({
+          chunkName: chunk.name, // 'title'
+          modules: chunk.modules, //[{moduleId:'./src/index.js'},{moduleId:'./src/title.js'}]
+        });
+      }
+      else{
+        source = EjsRender({
           entryModuleId: chunk.entryModule.moduleId, // './src/index.js'
           modules: chunk.modules, //[{moduleId:'./src/index.js'},{moduleId:'./src/title.js'}]
         });
-        this.emitAssets(filename,source);
+      }
+      
+      this.emitAssets(filename, source);
     }
   }
-  emitAssets(filename,source) {
-     this.assets[filename] = source;
-     this.files.push(filename);
+
+  /**
+   * 把代码写入到assets对象中
+   * @param {*} filename
+   * @param {*} source
+   */
+  emitAssets(filename, source) {
+    this.assets[filename] = source;
+    this.files.push(filename);
   }
 }
 exports = module.exports = Compilation;
