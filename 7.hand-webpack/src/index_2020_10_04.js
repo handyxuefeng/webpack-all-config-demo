@@ -26,11 +26,4 @@ import(/*webpackChunkName: "operate"*/ "./operate").then((result) => {
 console.log("sync = ", sync, "test=", test);
 
 
-/**
- * 在normalModule编写支持从node_modules加载第三方模块
-*/
-
-let isArray = require('isarray');
-console.log('isArray =',isArray([1,2,3,5,6]));
-
 

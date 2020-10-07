@@ -33,3 +33,8 @@ yarn add ejs -D
 - 先把代码转换为AST语法树
 - 找出动态import节点
 - 找到动态导入的模块的名称
+
+## 让webpack支持require到node_modules中的脚本
+
+
+

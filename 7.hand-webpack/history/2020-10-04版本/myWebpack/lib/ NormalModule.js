@@ -72,38 +72,36 @@ class NormalModule {
             //如果方法名是require的话
             let requireScriptName = node.arguments[0].value; // 获取依赖的脚本的名称 requireScriptName = "./title.js"
             console.log("遍历AST语法时，遍历到了有require的文件名为=", requireScriptName);
-            let absolutePathOfRequireSource; //脚本的绝对路径
-            //表示的require用户自定义的模块
-            if(requireScriptName.startsWith('.')){
-              //判断是否添加了扩展名
-              let extensionName =requireScriptName.split(path.posix.sep).pop().indexOf(".") == -1? ".js": "";
 
-              /**
-               *  1. 得到index.js文件所在的目录 = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src
-               *  path.posix.dirname('/Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src/index.js') = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src
-               *  2. 连接依赖模块的路径：requireScriptName + extensionName = 'title.js';
-               *
-               *  3.拼装路径
-               *   absolutePathOfRequireSource = path.posix.join('/Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src','title.js')
-               *
-               */
-              //获取依赖模块的绝对路径 = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src/title.js
-              absolutePathOfRequireSource = path.posix.join(
-                path.posix.dirname(this.resource), //this.resource = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src/index.js
-                requireScriptName + extensionName //
-              );
-              console.log("得到依赖文件的绝对路径=", absolutePathOfRequireSource);
-            }
-            else{
-               absolutePathOfRequireSource = require.resolve(path.posix.join(this.context,"node_modules",requireScriptName));
-               console.log('从node_modules加载的模块的路径=',absolutePathOfRequireSource);
-            }
+            //判断是否添加了扩展名
+            let extensionName =
+              requireScriptName.split(path.posix.sep).pop().indexOf(".") == -1
+                ? ".js"
+                : "";
+
+            /**
+             *  1. 得到index.js文件所在的目录 = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src
+             *  path.posix.dirname('/Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src/index.js') = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src
+             *  2. 连接依赖模块的路径：requireScriptName + extensionName = 'title.js';
+             *
+             *  3.拼装路径
+             *   absolutePathOfRequireSource = path.posix.join('/Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src','title.js')
+             *
+             */
+            //获取依赖模块的绝对路径 = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src/title.js
+            let absolutePathOfRequireSource = path.posix.join(
+              path.posix.dirname(this.resource), //this.resource = /Users/hanxf.han/study/webpack-serial/webpack-all-config-demo/7.hand-webpack/src/index.js
+              requireScriptName + extensionName //
+            );
+            console.log("得到依赖文件的绝对路径=", absolutePathOfRequireSource);
 
             /**
              * 得到index.js  依赖的title.js 的模块Id, 也即是
              * depModuleId = './src/title.js'
              */
-            let depModuleId ="./" + path.posix.relative(this.context, absolutePathOfRequireSource);
+            let depModuleId =
+              "./" +
+              path.posix.relative(this.context, absolutePathOfRequireSource);
             console.log(
               `得到依赖模块${absolutePathOfRequireSource}相对根目录${this.context}的相对路径，也即是依赖模块${requireScriptName}的moduleId`,
               depModuleId

@@ -125,61 +125,16 @@
     jsonpArray = jsonpArray.slice();
     for (var i = 0; i < jsonpArray.length; i++) webpackJsonpCallback(jsonpArray[i]);
     var parentJsonpFunction = oldJsonpFunction;
-    return __webpack_require__(__webpack_require__.s = "./src/index.js");
+    return __webpack_require__(__webpack_require__.s = "<%-entryModuleId%>");
   })
     ({
-        
-            "./src/index.js":
+        <%
+        for(let module of modules)
+        {%>
+            "<%-module.moduleId%>":
             (function (module, exports, __webpack_require__) {
-              let sync = __webpack_require__("./src/sync.js"); //同步导入代码方式  require("./sync") 替换为 __webpack_require__("./src/sync.js")
-let test = __webpack_require__("./src/test.js"); //同步导入代码方式
-
-/**
-import(/!*webpackChunkName: "title"*!/ "./title").then((result) => {
-  console.log(result.default);
-})
-替换为下面的
-__webpack_require__.e("title").then(__webpack_require__.t.bind(null, "./src/title.js", 7))
- .then(result => {
-  console.log(result.default);
-});
-*/
-__webpack_require__.e("title").then(__webpack_require__.t.bind(null, "./src/title.js", 7)).then(result => {
-  console.log(result.default);
-});
-
-__webpack_require__.e("sum").then(__webpack_require__.t.bind(null, "./src/sum.js", 7)).then(result => {
-  console.log(result.default);
-});
-
-__webpack_require__.e("operate").then(__webpack_require__.t.bind(null, "./src/operate.js", 7)).then(result => {
-  console.log(result.default);
-});
-
-console.log("sync = ", sync, "test=", test);
-
-let isArray = __webpack_require__("./node_modules/isarray/index.js");
-
-console.log('isArray =', isArray([1, 2, 3, 5, 6]));
+              <%-module._source%>
             }),
-        
-            "./src/sync.js":
-            (function (module, exports, __webpack_require__) {
-              exports = module.exports = `Sync__${Date.now() * 1}`;
-            }),
-        
-            "./src/test.js":
-            (function (module, exports, __webpack_require__) {
-              exports = module.exports = `test 文件__${Date.now() * 1}`;
-            }),
-        
-            "./node_modules/isarray/index.js":
-            (function (module, exports, __webpack_require__) {
-              var toString = {}.toString;
-
-module.exports = Array.isArray || function (arr) {
-  return toString.call(arr) == '[object Array]';
-};
-            }),
-         
+        <%}
+      %> 
     });
