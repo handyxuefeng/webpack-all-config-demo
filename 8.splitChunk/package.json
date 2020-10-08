@@ -1,0 +1,18 @@
+{
+  "name": "8.splitChunk",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "description": "",
+  "devDependencies": {
+    "html-webpack-plugin": "^4.5.0",
+    "isarray": "^2.0.5",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  }
+}
