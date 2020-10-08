@@ -13,6 +13,11 @@ const Chunk = require('./Chunk');
 const mainTemplate = fs.readFileSync(path.posix.join(__dirname,'template','main.ejs'),'utf8');
 const EjsRender = ejs.compile(mainTemplate);
 
+//支持splitChunk的模板
+const splitChunkTemplate = fs.readFileSync(path.posix.join(__dirname,'template','defererSplitChunkTemplate.ejs'),'utf8');
+const DefererSplitChunkRender = ejs.compile(splitChunkTemplate);
+
+
 const chunkTemplate = fs.readFileSync(path.posix.join(__dirname,'template','chunkTemplate.ejs'),'utf8');
 const chunkRender = ejs.compile(chunkTemplate);
 
@@ -30,6 +35,9 @@ class Compilation {
     this.chunks = [];
     this.files = []; //这里存放本次编译产生的所有文件名
     this.assets = {};
+    this.vendors = [];//放着所有的第三方模块 isarray
+    this.commons = [];//这里放着同时被多个代码块加载的模块  title.js
+    this.moduleCount= {};//可以记录每个模块被代码块引用的次数,如果大于等于2,就分离出到commons里
     this.hooks = {
       //每次构建完成一个模块后，就会触发此钩子执行
       succeed: new SyncHook(["module"]),
@@ -182,6 +190,57 @@ class Compilation {
     this.hooks.beforeChunks.call(); // 开始准备封装代码块
 
     /**
+     * 开始遍历modules中所有模块，区分哪些是要放到vendors里面，哪些是要放到commons里面
+     */
+     for(let module of this.modules){
+       let moduleId = module.moduleId;
+       //如果模块ID中有node_modules内容,说明是一个第三方模块
+       if (/node_modules/.test(moduleId)) {
+         module.name = 'vendors';
+         if(this.vendors.length==0){
+            this.vendors.push(module);
+         }
+         else{
+          this.vendors.forEach(item=>{
+            //避免重复放入
+            if (item.moduleId !== module.moduleId) {
+              this.vendors.push(module);
+            }
+          });
+        }
+       }else{
+         //this.moduleCount= {}
+          let count = this.moduleCount[module.moduleId];
+          if (count) {
+            this.moduleCount[module.moduleId].count++;
+          } else {
+            //如果没有,则给它赋初始值 {module,count} count是模块的引用次数
+            this.moduleCount[module.moduleId] = { module, count: 1 };
+          }
+       }
+     }
+    
+   
+    /**
+     * 统计每个代码块出现的次数，如果超如果webpack.config.js中配置的额次数
+     * 则提取到commons数组中
+     */
+    for(let moduleId in  this.moduleCount) {
+       const { module, count } = this.moduleCount[moduleId];
+       if (count >= 2) {
+         module.name = "commons";
+         this.commons.push(module);
+       }
+    }
+
+    console.log("this.vendors=", this.vendors,'this.commons = ',this.commons);
+
+
+    let deferredModuleIds  = [...this.vendors,...this.commons].map(module=>module.moduleId);
+    this.modules = this.modules.filter(module=>!deferredModuleIds.includes(module.moduleId));
+
+
+    /**
      * 每个入口会生成一个代码块
      */
     for (const entryModule of this.entries) {
@@ -192,6 +251,20 @@ class Compilation {
       chunk.modules = this.modules.filter(
         (module) => module.name === chunk.name
       );
+    }
+    if (this.vendors.length > 0) {
+      const chunk = new Chunk(this.vendors[0]); //根据入口模块得到一个代码块
+      chunk.async = true;
+      this.chunks.push(chunk);
+      //对所有模块进行过滤,找出来那些名称跟这个chunk一样的模块,组成一个数组赋给chunk.modules
+      chunk.modules = this.vendors;
+    }
+    if (this.commons.length > 0) {
+      const chunk = new Chunk(this.commons[0]); //根据入口模块得到一个代码块
+      chunk.async = true;
+      this.chunks.push(chunk);
+      //对所有模块进行过滤,找出来那些名称跟这个chunk一样的模块,组成一个数组赋给chunk.modules
+      chunk.modules = this.commons;
     }
     this.hooks.afterChunks.call(this.chunks);
     this.createChunkAssets(); //生成代码之后，要生成代码块对应的资源
@@ -210,10 +283,22 @@ class Compilation {
         });
       }
       else{
+        let deferredChunks = [];
+        if (this.vendors.length > 0) deferredChunks.push(`"vendors"`);
+        if (this.commons.length > 0) deferredChunks.push(`"commons"`);
+        /*
         source = EjsRender({
           entryModuleId: chunk.entryModule.moduleId, // './src/index.js'
           modules: chunk.modules, //[{moduleId:'./src/index.js'},{moduleId:'./src/title.js'}]
         });
+        */
+       source = DefererSplitChunkRender({
+         deferredChunks,
+         entryModuleId: chunk.entryModule.moduleId, // './src/index.js'
+         modules: chunk.modules, //[{moduleId:'./src/index.js'},{moduleId:'./src/title.js'}]
+       });
+
+
       }
       
       this.emitAssets(filename, source);

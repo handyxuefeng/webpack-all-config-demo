@@ -10,5 +10,5 @@ debugger;
 compiler.run((err, statsInstance) => {
   console.log(err);
   let obj = statsInstance.toJson();
-  console.log("3.编译结果，obj = ", obj);
+  //console.log("3.编译结果，obj = ", obj);
 });

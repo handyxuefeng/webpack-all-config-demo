@@ -4,9 +4,6 @@ const MultiEntryPlugin = require('./MultiEntryPlugin');
 
 
 const itemToPlugin = (context, entry, name) => {
-	if (Array.isArray(entry)) {
-		return new MultiEntryPlugin(context, entry, name);
-	}
 	return new SingleEntryPlugin(context, entry, name);
 };
 
@@ -25,8 +22,18 @@ class EntryOptionPlugin {
          * 在钩子上注册事件
          */
         compiler.hooks.entryOption.tap('EntryOptionPlugin',(context,entry)=>{
-            itemToPlugin(context, entry, "main").apply(compiler);
-        })
+            if(typeof entry ==='string') {
+                itemToPlugin(context, entry, "main").apply(compiler);
+            }
+            else{
+                for(let entryName in entry){
+                    if(Object.prototype.hasOwnProperty.call(entry,entryName)) {
+                         itemToPlugin(context, entry[entryName], entryName).apply(compiler);
+                    }
+                }
+            }
+            
+        });
     }
 }
 
