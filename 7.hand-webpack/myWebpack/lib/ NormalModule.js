@@ -3,6 +3,8 @@ const t = require("babel-types"); //babel-types-api 用于 AST 节点的 Lodash 
 const generate = require("babel-generator").default; // 把ast重新生成js代码
 const traverse = require("babel-traverse").default; //  用于对 AST 的遍历，维护了整棵树的状态，并且负责替换、移除和添加节点
 const neoAsync = require("neo-async"); //类似promise-all
+const {runLoaders} = require("../loader-runner");
+
 class NormalModule {
   /**
    * name = 'main'
@@ -201,8 +203,32 @@ class NormalModule {
   doBuild(compilation, buildCallBack) {
     //1.先根据路径读取硬盘上的指定文件的源代码
     this.getSource(compilation, (err, source) => {
-      this._source = source; // 读到了源代码
-      buildCallBack(err);
+      //在这里把硬盘的内容读出来,读出来之后交给loadRunner进行转换
+      let {
+        module: { rules },
+      } = compilation.options;
+      let loaders = [];
+      for (let i = 0; i < rules.length; i++) {
+        let rule = rules[i];
+        if (rule.test.test(this.resource)) {
+          loaders.push(...rule.use);
+        }
+      }
+      //loader的绝对路径的数组
+      const resolveLoader = (loader) =>
+        require.resolve(path.posix.join(this.context, "loaders", loader));
+      loaders = loaders.map(resolveLoader);
+      runLoaders(
+        {
+          resource: this.resource,
+          loaders,
+        },
+        (err, { result }) => {
+          this._source = result.toString();
+          console.log(this._source);
+          buildCallBack();
+        }
+      );
     });
   }
   /**
