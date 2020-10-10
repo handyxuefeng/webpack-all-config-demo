@@ -8,12 +8,12 @@ const AttributeStringValue = 'AttributeStringValue'; //元素字符串值
 const JSXText = 'JSXText'; //JSX文本
 const Equator = 'Equator';
 
-let sourceCode = `<h1 id="title" name="ast" if='show'><span>hello</span>world</h1>`;
+let sourceCode = `<h1 id="title" name="ast" if='show' v-model="{{name}}"><span>hello</span>world</h1>`;
 //let sourceCode = `<template ><span>abc</span><div id="container" name="content">123</div>hello<i>world</i></template>`
-//let sourceCode = `<t >1</t>`;
+//let sourceCode = `<t v-model="{name}">1</t>`;
 
 let currentToken = { type: '', value: '' };
-let LettersNumberReg = /[a-zA-Z0-9]/;
+let LettersNumberReg = /[a-zA-Z0-9-]/;
 let tokens = [];
 function SaveToken() {
     if(currentToken.value.length>0){
@@ -113,7 +113,7 @@ function getAttributeFun(char) {
 
 //读取属性的值 id = "title"
 function getAttributeValueFun(char) {
-    if (char === '"' || char==="'") {  //属性的key已经结束
+    if (['"',"'","{","}"].includes(char)) {  //属性的key已经结束
         currentToken.type = AttributeStringValue;
         currentToken.value += char;
         return getAttributeValueFun;
