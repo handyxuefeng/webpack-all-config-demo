@@ -8,7 +8,7 @@ const AttributeStringValue = 'AttributeStringValue'; //元素字符串值
 const JSXText = 'JSXText'; //JSX文本
 const Equator = 'Equator';
 
-let sourceCode = `<h1 id="title" name="ast" if='show' v-model="{{name}}"><span>hello</span>world</h1>`;
+let sourceCode = `<h1 id="title" name="ast" if='show' v-model="{{name}}"><span id="txtSpan">hello</span>world</h1>`;
 //let sourceCode = `<template ><span>abc</span><div id="container" name="content">123</div>hello<i>world</i></template>`
 //let sourceCode = `<t v-model="{name}">1</t>`;
 
@@ -16,7 +16,7 @@ let currentToken = { type: '', value: '' };
 let LettersNumberReg = /[a-zA-Z0-9-]/;
 let tokens = [];
 function SaveToken() {
-    if(currentToken.value.length>0){
+    if (currentToken.value.length > 0) {
         tokens.push(currentToken);
     }
     currentToken = { type: '', value: '' };
@@ -101,7 +101,7 @@ function getAttributeFun(char) {
         SaveToken();
         return getAttributeValueFun;
     }
-    else if(char==='>'){
+    else if (char === '>') {
         SaveToken();
         currentToken.type = RightParentCheses;
         currentToken.value += char;
@@ -113,7 +113,7 @@ function getAttributeFun(char) {
 
 //读取属性的值 id = "title"
 function getAttributeValueFun(char) {
-    if (['"',"'","{","}"].includes(char)) {  //属性的key已经结束
+    if (['"', "'", "{", "}"].includes(char)) {  //属性的key已经结束
         currentToken.type = AttributeStringValue;
         currentToken.value += char;
         return getAttributeValueFun;
@@ -128,16 +128,13 @@ function getAttributeValueFun(char) {
         SaveToken();
         return foundRightParentCheses;
     }
-    else if(LettersNumberReg.test(char)){
+    else if (LettersNumberReg.test(char)) {
         currentToken.type = AttributeStringValue;
         currentToken.value += char;
         return getAttributeValueFun;
     }
 
     throw new Error(`getAttributeValueFun报错了,${tokens},char = ${char}`)
-
-
-
 
 }
 
@@ -168,10 +165,10 @@ function tokenizer(SouceCode) {
     //循环迭代字符串
     for (let char of SouceCode) {
         let nextStateFun = currentStateFun(char);  //分析当期字符，并返回一个新的或者下一个新的状态的函数
-       // console.log(`下一个状态的函数名称为:${nextStateFun.name}`, '_', Date.now() * 1);
+        // console.log(`下一个状态的函数名称为:${nextStateFun.name}`, '_', Date.now() * 1);
         currentStateFun = nextStateFun;
     }
-    if(currentToken.value.length>0){
+    if (currentToken.value.length > 0) {
         SaveToken();
     }
     return tokens;
