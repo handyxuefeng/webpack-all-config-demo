@@ -10,8 +10,8 @@ const DIVIDER = 'DIVIDER';
 const tokensTypeArr = [NUMBER, PLUS, MULTIPLY, SUBMINUS, DIVIDER];
 
 
-let sourceCode = `2+3+4`;
-//let sourceCode = `1+2*6-2/2`;
+//let sourceCode = `2+3+4`;
+let sourceCode = `1+2*6-2/2`;
 let regExp = /(\d+)|(\+)|(\*)|(\-)|(\/)/g;
 
 /**
@@ -31,7 +31,7 @@ function tokenize(sourceCode) {
         let result = regExp.exec(sourceCode);
        // console.log('result=',result);
         let index = result.findIndex((item, idx) => {
-            return (idx > 0 && item);
+            return (idx > 0 && !!item);
         });
         let value = result[0];//
         let type = tokensTypeArr[index - 1];

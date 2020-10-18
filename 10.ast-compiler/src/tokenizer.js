@@ -174,13 +174,11 @@ function tokenizer(SouceCode) {
     return tokens;
 }
 
-let result = tokenizer(sourceCode);
-console.log(`词法分析结果为:result=`, result);
+//let result = tokenizer(sourceCode);
+//console.log(`词法分析结果为:result=`, result);
 
 
-exports.tokenizer = module.exports = {
-    tokenizer
-};
+exports.tokenizer = module.exports = tokenizer;
 
 /**
  *  { type: 'LeftParentCheses', value: '<' },
